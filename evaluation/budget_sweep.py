@@ -39,7 +39,8 @@ def sweep(tasks: Sequence[Mapping[str, Any]], budgets: Sequence[int], *,
           input_rate: Optional[float] = None,
           output_rate: Optional[float] = None,
           max_items: Optional[int] = None,
-          stopping: Optional[StoppingRule] = None) -> Dict[str, Any]:
+          stopping: Optional[StoppingRule] = None,
+          checkpoint: Optional[Path] = None) -> Dict[str, Any]:
     points: List[Dict[str, Any]] = []
     for budget in sorted(budgets):
         report = benchmark(tasks, mock=mock, token_budget=budget, max_tokens=None,
@@ -77,8 +78,26 @@ def sweep(tasks: Sequence[Mapping[str, Any]], budgets: Sequence[int], *,
             },
             "variance": report.get("variance", {}).get("success_deltas_interpretable"),
         })
+        if checkpoint is not None:
+            # A live sweep is hours of paid calls and used to write nothing until
+            # it finished, so one dropped socket discarded every call already made.
+            # Each completed budget point is durable from here on.
+            _write_checkpoint(checkpoint, budgets, arms, points, max_items,
+                              repetitions, stopping)
+    result = _assemble(budgets, arms, points, max_items, repetitions, stopping)
+    if checkpoint is not None:
+        # Clear the "partial" marker as soon as the last point lands, rather than
+        # relying on the caller's own final write: a file left marked partial
+        # after a complete run would be read as a crashed one.
+        _write_json(checkpoint, result)
+    return result
+
+
+def _assemble(budgets: Sequence[int], arms: Sequence[str], points: Sequence[Mapping[str, Any]],
+              max_items: Optional[int], repetitions: int,
+              stopping: Optional[StoppingRule]) -> Dict[str, Any]:
     reach = _tokens_to_reach(points, arms)
-    return {"budgets": sorted(budgets), "arms": list(arms), "points": points,
+    return {"budgets": sorted(budgets), "arms": list(arms), "points": list(points),
             "max_items": max_items,
             "repetitions": repetitions,
             # A manipulated variable, recorded so a stopping-on table can never be
@@ -96,6 +115,20 @@ def sweep(tasks: Sequence[Mapping[str, Any]], budgets: Sequence[int], *,
             "co_primary_endpoints": _co_primary(points, arms),
             "note": "mock runs measure whether required evidence survives the budget, "
                     "not model competence"}
+
+
+def _write_checkpoint(path: Path, budgets, arms, points, max_items, repetitions,
+                      stopping) -> None:
+    partial = _assemble(budgets, arms, points, max_items, repetitions, stopping)
+    partial["partial"] = True
+    partial["budgets_completed"] = [point["token_budget"] for point in points]
+    _write_json(path, partial)
+
+
+def _write_json(path: Path, payload: Mapping[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n",
+                    encoding="utf-8")
 
 
 def _safe_mean(arm_report: Mapping[str, Any], total_key: str) -> Optional[float]:
@@ -309,7 +342,10 @@ def main() -> int:
     result = sweep(tasks, args.budgets, arms=args.arms, mock=args.mock,
                    repetitions=max(1, args.repetitions), codex_cli=args.codex_cli,
                    max_items=args.max_items,
-                   stopping=StoppingRule() if args.stopping else None)
+                   stopping=StoppingRule() if args.stopping else None,
+                   # Checkpoint to the final path: a crash leaves the completed
+                   # budget points on disk, marked "partial": true.
+                   checkpoint=args.output)
     rendered = json.dumps(result, indent=2, sort_keys=True)
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)

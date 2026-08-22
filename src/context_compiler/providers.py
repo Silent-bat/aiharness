@@ -7,14 +7,30 @@ provider SDK. The transport uses only the Python standard library.
 
 import json
 import os
+import socket
+import time
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Mapping, Optional, Sequence
+from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
 
 class ProviderError(RuntimeError):
-    """Raised for invalid provider configuration or a provider API failure."""
+    """Raised for invalid provider configuration or a provider API failure.
+
+    `transient` marks failures worth retrying -- read timeouts, connection resets,
+    rate limits, and 5xx responses -- as opposed to a bad key or a malformed
+    request, where retrying only spends money to fail again.
+    """
+
+    def __init__(self, message: str, *, transient: bool = False):
+        super().__init__(message)
+        self.transient = transient
+
+
+# Retried statuses: rate limiting and anything the provider blames on itself.
+TRANSIENT_STATUS = (408, 409, 425, 429, 500, 502, 503, 504, 522, 524)
 
 
 def load_env_file(path: "os.PathLike[str] | str" = ".env") -> List[str]:
@@ -56,7 +72,15 @@ class ProviderConfig:
     api_key: Optional[str] = None
     base_url: Optional[str] = None
     api_version: str = "2023-06-01"
-    timeout_seconds: float = 120.0
+    # A 120s ceiling was not enough: live mean latency on this benchmark is ~50s
+    # with a 27s standard deviation, so the tail crosses 120s often enough that a
+    # 192-call sweep died on its first budget point.
+    timeout_seconds: float = 300.0
+    # Bounded retries on transient transport failures. A benchmark run is hours
+    # long and writes nothing until it finishes, so one dropped socket used to
+    # discard every call already paid for.
+    max_attempts: int = 4
+    retry_backoff_seconds: float = 2.0
 
     @classmethod
     def from_env(cls, environ: Optional[Mapping[str, str]] = None) -> "ProviderConfig":
@@ -93,7 +117,9 @@ class ProviderConfig:
             api_key=api_key,
             base_url=env.get("AI_BASE_URL", base_url),
             api_version=env.get("ANTHROPIC_VERSION", "2023-06-01"),
-            timeout_seconds=float(env.get("AI_TIMEOUT_SECONDS", "120")),
+            timeout_seconds=float(env.get("AI_TIMEOUT_SECONDS", "300")),
+            max_attempts=int(env.get("AI_MAX_ATTEMPTS", "4")),
+            retry_backoff_seconds=float(env.get("AI_RETRY_BACKOFF_SECONDS", "2")),
         )
 
 
@@ -131,6 +157,18 @@ def _default_transport(url: str, headers: Mapping[str, str], payload: Mapping[st
     try:
         with urlopen(request, timeout=timeout) as response:
             return json.loads(response.read().decode("utf-8"))
+    except HTTPError as error:
+        raise ProviderError(
+            "model request failed: HTTP {}".format(error.code),
+            transient=error.code in TRANSIENT_STATUS) from error
+    except (socket.timeout, TimeoutError) as error:
+        raise ProviderError("model request failed: {}".format(error),
+                            transient=True) from error
+    except URLError as error:
+        # DNS failures and connection resets both land here; both are worth one
+        # more attempt, and a persistently wrong host still fails after the last.
+        raise ProviderError("model request failed: {}".format(error.reason),
+                            transient=True) from error
     except Exception as error:
         raise ProviderError("model request failed: {}".format(error)) from error
 
@@ -138,9 +176,37 @@ def _default_transport(url: str, headers: Mapping[str, str], payload: Mapping[st
 class ModelClient:
     """Send normalized chat requests through a configured provider adapter."""
 
-    def __init__(self, config: ProviderConfig, transport: Optional[JsonTransport] = None):
+    def __init__(self, config: ProviderConfig, transport: Optional[JsonTransport] = None,
+                 sleep: Optional[Callable[[float], None]] = None):
         self.config = config
-        self._transport = transport or _default_transport
+        self._transport = self._retrying(transport or _default_transport)
+        self._sleep = sleep or time.sleep
+        # Retries actually taken, so a run can report how much of its wall-clock
+        # time was spent on failures rather than on the model.
+        self.retries = 0
+
+    def _retrying(self, transport: JsonTransport) -> JsonTransport:
+        """Wrap a transport so transient failures are retried with backoff.
+
+        Retries are bounded and exponential, and only transient failures qualify:
+        a rejected key fails on the first attempt rather than four times. The last
+        attempt's error propagates unchanged, so a persistent outage still stops
+        the run instead of being swallowed.
+        """
+
+        def attempt(url, headers, payload, timeout):
+            attempts = max(1, self.config.max_attempts)
+            for index in range(1, attempts + 1):
+                try:
+                    return transport(url, headers, payload, timeout)
+                except ProviderError as error:
+                    if not getattr(error, "transient", False) or index == attempts:
+                        raise
+                    self.retries += 1
+                    self._sleep(self.config.retry_backoff_seconds * (2 ** (index - 1)))
+            raise AssertionError("unreachable")
+
+        return attempt
 
     def complete(
         self,

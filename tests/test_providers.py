@@ -105,3 +105,96 @@ class ProviderTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class RetryTest(unittest.TestCase):
+    """Transient failures must not discard a run that is hours of paid calls.
+
+    A 192-call live sweep died on its first budget point when one read timed out,
+    losing every call already made. These pin both halves of the fix: retry what
+    is worth retrying, and never retry what is not.
+    """
+
+    def _client(self, transport, **overrides):
+        config = ProviderConfig(provider="openrouter", model="m", api_key="k",
+                                base_url="https://example.invalid/v1/chat/completions",
+                                **overrides)
+        return ModelClient(config, transport=transport, sleep=lambda _seconds: None)
+
+    @staticmethod
+    def _ok(url, headers, payload, timeout):
+        return {"choices": [{"message": {"content": "done"}}], "model": "m"}
+
+    def test_a_transient_failure_is_retried_and_then_succeeds(self):
+        attempts = []
+
+        def flaky(url, headers, payload, timeout):
+            attempts.append(1)
+            if len(attempts) < 3:
+                raise ProviderError("read timed out", transient=True)
+            return self._ok(url, headers, payload, timeout)
+
+        client = self._client(flaky)
+        self.assertEqual(client.complete([{"role": "user", "content": "hi"}]).text, "done")
+        self.assertEqual(len(attempts), 3)
+        # Reported so a run can say how much wall clock went to failures.
+        self.assertEqual(client.retries, 2)
+
+    def test_a_permanent_failure_is_not_retried(self):
+        # Retrying a rejected key only spends money to fail four times.
+        attempts = []
+
+        def rejected(url, headers, payload, timeout):
+            attempts.append(1)
+            raise ProviderError("HTTP 401")
+
+        client = self._client(rejected)
+        with self.assertRaises(ProviderError):
+            client.complete([{"role": "user", "content": "hi"}])
+        self.assertEqual(len(attempts), 1)
+        self.assertEqual(client.retries, 0)
+
+    def test_retries_are_bounded_and_the_last_error_propagates(self):
+        attempts = []
+
+        def always_timing_out(url, headers, payload, timeout):
+            attempts.append(1)
+            raise ProviderError("read timed out", transient=True)
+
+        client = self._client(always_timing_out, max_attempts=3)
+        with self.assertRaises(ProviderError) as caught:
+            client.complete([{"role": "user", "content": "hi"}])
+        self.assertEqual(len(attempts), 3)
+        self.assertIn("timed out", str(caught.exception))
+
+    def test_backoff_is_exponential_in_the_configured_step(self):
+        waits = []
+        attempts = []
+
+        def flaky(url, headers, payload, timeout):
+            attempts.append(1)
+            if len(attempts) < 4:
+                raise ProviderError("boom", transient=True)
+            return self._ok(url, headers, payload, timeout)
+
+        config = ProviderConfig(provider="openrouter", model="m", api_key="k",
+                                base_url="u", retry_backoff_seconds=1.5)
+        client = ModelClient(config, transport=flaky, sleep=waits.append)
+        client.complete([{"role": "user", "content": "hi"}])
+        self.assertEqual(waits, [1.5, 3.0, 6.0])
+
+    def test_the_read_timeout_is_wide_enough_for_this_benchmark(self):
+        # Live mean latency is ~50s with a 27s sd, so a 120s ceiling sat inside
+        # the observed tail. Pinned so it is not quietly lowered again.
+        self.assertGreaterEqual(ProviderConfig(provider="p", model="m").timeout_seconds, 300)
+        self.assertGreaterEqual(
+            ProviderConfig.from_env({"AI_PROVIDER": "openrouter", "AI_MODEL": "m",
+                                     "OPENROUTER_API_KEY": "k"}).timeout_seconds, 300)
+
+    def test_environment_can_override_the_retry_policy(self):
+        config = ProviderConfig.from_env({
+            "AI_PROVIDER": "openrouter", "AI_MODEL": "m", "OPENROUTER_API_KEY": "k",
+            "AI_MAX_ATTEMPTS": "7", "AI_RETRY_BACKOFF_SECONDS": "0.5",
+            "AI_TIMEOUT_SECONDS": "600"})
+        self.assertEqual((config.max_attempts, config.retry_backoff_seconds,
+                          config.timeout_seconds), (7, 0.5, 600.0))
