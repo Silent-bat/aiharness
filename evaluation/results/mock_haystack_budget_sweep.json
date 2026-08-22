@@ -1,0 +1,282 @@
+{
+  "arms": [
+    "full_file",
+    "classic",
+    "vector",
+    "graphrag",
+    "graph_only",
+    "oracle"
+  ],
+  "budgets": [
+    512,
+    1024,
+    2048,
+    4000,
+    8000
+  ],
+  "max_items": 200,
+  "note": "mock runs measure whether required evidence survives the budget, not model competence",
+  "points": [
+    {
+      "arms": {
+        "classic": {
+          "attempts": 6,
+          "mean_context_items": 4.5,
+          "mean_context_tokens": 498.5,
+          "success_rate": 0.0,
+          "successes": 0
+        },
+        "full_file": {
+          "attempts": 6,
+          "mean_context_items": 4.17,
+          "mean_context_tokens": 490.5,
+          "success_rate": 0.0,
+          "successes": 0
+        },
+        "graph_only": {
+          "attempts": 6,
+          "mean_context_items": 4.0,
+          "mean_context_tokens": 489.0,
+          "success_rate": 1.0,
+          "successes": 6
+        },
+        "graphrag": {
+          "attempts": 6,
+          "mean_context_items": 4.17,
+          "mean_context_tokens": 491.67,
+          "success_rate": 0.16666666666666666,
+          "successes": 1
+        },
+        "oracle": {
+          "attempts": 6,
+          "mean_context_items": 3.0,
+          "mean_context_tokens": 379.0,
+          "success_rate": 1.0,
+          "successes": 6
+        },
+        "vector": {
+          "attempts": 6,
+          "mean_context_items": 3.5,
+          "mean_context_tokens": 493.17,
+          "success_rate": 0.0,
+          "successes": 0
+        }
+      },
+      "token_budget": 512
+    },
+    {
+      "arms": {
+        "classic": {
+          "attempts": 6,
+          "mean_context_items": 8.17,
+          "mean_context_tokens": 994.5,
+          "success_rate": 0.0,
+          "successes": 0
+        },
+        "full_file": {
+          "attempts": 6,
+          "mean_context_items": 7.67,
+          "mean_context_tokens": 1005.67,
+          "success_rate": 0.0,
+          "successes": 0
+        },
+        "graph_only": {
+          "attempts": 6,
+          "mean_context_items": 8.0,
+          "mean_context_tokens": 999.67,
+          "success_rate": 1.0,
+          "successes": 6
+        },
+        "graphrag": {
+          "attempts": 6,
+          "mean_context_items": 8.0,
+          "mean_context_tokens": 1011.17,
+          "success_rate": 0.16666666666666666,
+          "successes": 1
+        },
+        "oracle": {
+          "attempts": 6,
+          "mean_context_items": 3.0,
+          "mean_context_tokens": 379.33,
+          "success_rate": 1.0,
+          "successes": 6
+        },
+        "vector": {
+          "attempts": 6,
+          "mean_context_items": 6.83,
+          "mean_context_tokens": 992.5,
+          "success_rate": 0.0,
+          "successes": 0
+        }
+      },
+      "token_budget": 1024
+    },
+    {
+      "arms": {
+        "classic": {
+          "attempts": 6,
+          "mean_context_items": 22.83,
+          "mean_context_tokens": 2015.5,
+          "success_rate": 0.0,
+          "successes": 0
+        },
+        "full_file": {
+          "attempts": 6,
+          "mean_context_items": 10.17,
+          "mean_context_tokens": 2028.17,
+          "success_rate": 0.0,
+          "successes": 0
+        },
+        "graph_only": {
+          "attempts": 6,
+          "mean_context_items": 20.0,
+          "mean_context_tokens": 2034.33,
+          "success_rate": 1.0,
+          "successes": 6
+        },
+        "graphrag": {
+          "attempts": 6,
+          "mean_context_items": 19.5,
+          "mean_context_tokens": 2030.83,
+          "success_rate": 0.16666666666666666,
+          "successes": 1
+        },
+        "oracle": {
+          "attempts": 6,
+          "mean_context_items": 3.0,
+          "mean_context_tokens": 379.33,
+          "success_rate": 1.0,
+          "successes": 6
+        },
+        "vector": {
+          "attempts": 6,
+          "mean_context_items": 17.33,
+          "mean_context_tokens": 2009.33,
+          "success_rate": 0.16666666666666666,
+          "successes": 1
+        }
+      },
+      "token_budget": 2048
+    },
+    {
+      "arms": {
+        "classic": {
+          "attempts": 6,
+          "mean_context_items": 53.67,
+          "mean_context_tokens": 3973.67,
+          "success_rate": 0.16666666666666666,
+          "successes": 1
+        },
+        "full_file": {
+          "attempts": 6,
+          "mean_context_items": 13.67,
+          "mean_context_tokens": 3976.5,
+          "success_rate": 0.0,
+          "successes": 0
+        },
+        "graph_only": {
+          "attempts": 6,
+          "mean_context_items": 45.33,
+          "mean_context_tokens": 3975.17,
+          "success_rate": 1.0,
+          "successes": 6
+        },
+        "graphrag": {
+          "attempts": 6,
+          "mean_context_items": 45.0,
+          "mean_context_tokens": 3980.33,
+          "success_rate": 0.8333333333333334,
+          "successes": 5
+        },
+        "oracle": {
+          "attempts": 6,
+          "mean_context_items": 3.0,
+          "mean_context_tokens": 379.33,
+          "success_rate": 1.0,
+          "successes": 6
+        },
+        "vector": {
+          "attempts": 6,
+          "mean_context_items": 42.5,
+          "mean_context_tokens": 3964.0,
+          "success_rate": 0.16666666666666666,
+          "successes": 1
+        }
+      },
+      "token_budget": 4000
+    },
+    {
+      "arms": {
+        "classic": {
+          "attempts": 6,
+          "mean_context_items": 104.67,
+          "mean_context_tokens": 7150.5,
+          "success_rate": 0.16666666666666666,
+          "successes": 1
+        },
+        "full_file": {
+          "attempts": 6,
+          "mean_context_items": 24.67,
+          "mean_context_tokens": 7970.5,
+          "success_rate": 0.0,
+          "successes": 0
+        },
+        "graph_only": {
+          "attempts": 6,
+          "mean_context_items": 66.67,
+          "mean_context_tokens": 5738.33,
+          "success_rate": 1.0,
+          "successes": 6
+        },
+        "graphrag": {
+          "attempts": 6,
+          "mean_context_items": 102.5,
+          "mean_context_tokens": 7919.33,
+          "success_rate": 1.0,
+          "successes": 6
+        },
+        "oracle": {
+          "attempts": 6,
+          "mean_context_items": 3.0,
+          "mean_context_tokens": 379.33,
+          "success_rate": 1.0,
+          "successes": 6
+        },
+        "vector": {
+          "attempts": 6,
+          "mean_context_items": 95.5,
+          "mean_context_tokens": 7980.33,
+          "success_rate": 0.3333333333333333,
+          "successes": 2
+        }
+      },
+      "token_budget": 8000
+    }
+  ],
+  "tokens_to_reach": {
+    "classic": {
+      "budget_for_success_rate_0.5": null,
+      "budget_for_success_rate_1": null
+    },
+    "full_file": {
+      "budget_for_success_rate_0.5": null,
+      "budget_for_success_rate_1": null
+    },
+    "graph_only": {
+      "budget_for_success_rate_0.5": 512,
+      "budget_for_success_rate_1": 512
+    },
+    "graphrag": {
+      "budget_for_success_rate_0.5": 4000,
+      "budget_for_success_rate_1": 8000
+    },
+    "oracle": {
+      "budget_for_success_rate_0.5": 512,
+      "budget_for_success_rate_1": 512
+    },
+    "vector": {
+      "budget_for_success_rate_0.5": null,
+      "budget_for_success_rate_1": null
+    }
+  }
+}

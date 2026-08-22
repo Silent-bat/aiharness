@@ -1,0 +1,475 @@
+{
+  "cases": 6,
+  "test_hint": false,
+  "summary": {
+    "grep_loop": {
+      "cases": 6,
+      "solved": 2,
+      "mean_turns": 9.0,
+      "mean_no_cache_input_tokens": 27371,
+      "mean_cached_input_tokens": 6884,
+      "mean_final_transcript_tokens": 4634
+    },
+    "map_expand": {
+      "cases": 6,
+      "solved": 6,
+      "mean_turns": 3.5,
+      "mean_no_cache_input_tokens": 44274,
+      "mean_cached_input_tokens": 15879,
+      "mean_final_transcript_tokens": 12806
+    },
+    "map_query": {
+      "cases": 6,
+      "solved": 6,
+      "mean_turns": 4.67,
+      "mean_no_cache_input_tokens": 1840,
+      "mean_cached_input_tokens": 687,
+      "mean_final_transcript_tokens": 641
+    }
+  },
+  "runs": [
+    {
+      "arm": "grep_loop",
+      "case": "debug-empty-cart",
+      "solved": false,
+      "required_evidence": [
+        "submit_order",
+        "validate_amount",
+        "test_empty_cart_is_rejected"
+      ],
+      "missing_evidence": [
+        "test_empty_cart_is_rejected"
+      ],
+      "turns": 8,
+      "final_transcript_tokens": 4501,
+      "no_cache_input_tokens": 17781,
+      "cached_input_tokens": 5458,
+      "new_tokens": 4450,
+      "calls": [
+        "grep submit_order",
+        "read_file modules/mod_048.py",
+        "read_file modules/mod_080.py",
+        "read_file modules/mod_030.py",
+        "read_file checkout.py",
+        "read_file payments.py",
+        "grep collection",
+        "read_file modules/mod_109.py"
+      ]
+    },
+    {
+      "arm": "map_expand",
+      "case": "debug-empty-cart",
+      "solved": true,
+      "required_evidence": [
+        "submit_order",
+        "validate_amount",
+        "test_empty_cart_is_rejected"
+      ],
+      "missing_evidence": [],
+      "turns": 4,
+      "final_transcript_tokens": 12767,
+      "no_cache_input_tokens": 50464,
+      "cached_input_tokens": 16470,
+      "new_tokens": 242,
+      "calls": [
+        "read_symbol test_empty_cart_is_rejected",
+        "read_symbol submit_order",
+        "read_symbol checkout_total",
+        "read_symbol validate_amount"
+      ]
+    },
+    {
+      "arm": "map_query",
+      "case": "debug-empty-cart",
+      "solved": true,
+      "required_evidence": [
+        "submit_order",
+        "validate_amount",
+        "test_empty_cart_is_rejected"
+      ],
+      "missing_evidence": [],
+      "turns": 6,
+      "final_transcript_tokens": 574,
+      "no_cache_input_tokens": 2071,
+      "cached_input_tokens": 657,
+      "new_tokens": 515,
+      "calls": [
+        "find_symbol submit_order collection",
+        "read_symbol test_empty_cart_is_rejected",
+        "read_symbol submit_order",
+        "read_symbol PaymentGateway",
+        "read_symbol checkout_total",
+        "read_symbol validate_amount"
+      ]
+    },
+    {
+      "arm": "grep_loop",
+      "case": "debug-malformed-payload",
+      "solved": false,
+      "required_evidence": [
+        "process_request",
+        "test_malformed_input_is_rejected",
+        "sanitize_payload"
+      ],
+      "missing_evidence": [
+        "test_malformed_input_is_rejected"
+      ],
+      "turns": 13,
+      "final_transcript_tokens": 14296,
+      "no_cache_input_tokens": 69304,
+      "cached_input_tokens": 18270,
+      "new_tokens": 14235,
+      "calls": [
+        "grep process_request",
+        "read_file modules/mod_048.py",
+        "read_file modules/mod_030.py",
+        "read_file modules/mod_080.py",
+        "read_file modules/mod_109.py",
+        "read_file api.py",
+        "read_file validation.py",
+        "grep ValueError",
+        "grep malformed",
+        "grep requests",
+        "grep crashes",
+        "grep invalid",
+        "grep input"
+      ]
+    },
+    {
+      "arm": "map_expand",
+      "case": "debug-malformed-payload",
+      "solved": true,
+      "required_evidence": [
+        "process_request",
+        "test_malformed_input_is_rejected",
+        "sanitize_payload"
+      ],
+      "missing_evidence": [],
+      "turns": 3,
+      "final_transcript_tokens": 12971,
+      "no_cache_input_tokens": 37986,
+      "cached_input_tokens": 15236,
+      "new_tokens": 366,
+      "calls": [
+        "read_symbol test_malformed_input_is_rejected",
+        "read_symbol process_request",
+        "read_symbol sanitize_payload"
+      ]
+    },
+    {
+      "arm": "map_query",
+      "case": "debug-malformed-payload",
+      "solved": true,
+      "required_evidence": [
+        "process_request",
+        "test_malformed_input_is_rejected",
+        "sanitize_payload"
+      ],
+      "missing_evidence": [],
+      "turns": 4,
+      "final_transcript_tokens": 704,
+      "no_cache_input_tokens": 1221,
+      "cached_input_tokens": 519,
+      "new_tokens": 635,
+      "calls": [
+        "find_symbol process_request ValueError malformed requests crashes invalid input",
+        "read_symbol process_request",
+        "read_symbol test_malformed_input_is_rejected",
+        "read_symbol sanitize_payload"
+      ]
+    },
+    {
+      "arm": "grep_loop",
+      "case": "debug-currency-rounding",
+      "solved": true,
+      "required_evidence": [
+        "charge_invoice",
+        "compute_minor_units"
+      ],
+      "missing_evidence": [],
+      "turns": 7,
+      "final_transcript_tokens": 3726,
+      "no_cache_input_tokens": 16560,
+      "cached_input_tokens": 4985,
+      "new_tokens": 3665,
+      "calls": [
+        "grep charge_invoice",
+        "read_file modules/mod_048.py",
+        "read_file modules/mod_030.py",
+        "read_file modules/mod_080.py",
+        "read_file billing.py",
+        "read_file modules/mod_109.py",
+        "read_file money.py"
+      ]
+    },
+    {
+      "arm": "map_expand",
+      "case": "debug-currency-rounding",
+      "solved": true,
+      "required_evidence": [
+        "charge_invoice",
+        "compute_minor_units"
+      ],
+      "missing_evidence": [],
+      "turns": 3,
+      "final_transcript_tokens": 12725,
+      "no_cache_input_tokens": 37936,
+      "cached_input_tokens": 15214,
+      "new_tokens": 131,
+      "calls": [
+        "read_symbol test_decimal_price_uses_exact_cents",
+        "read_symbol charge_invoice",
+        "read_symbol compute_minor_units"
+      ]
+    },
+    {
+      "arm": "map_query",
+      "case": "debug-currency-rounding",
+      "solved": true,
+      "required_evidence": [
+        "charge_invoice",
+        "compute_minor_units"
+      ],
+      "missing_evidence": [],
+      "turns": 4,
+      "final_transcript_tokens": 542,
+      "no_cache_input_tokens": 1433,
+      "cached_input_tokens": 599,
+      "new_tokens": 473,
+      "calls": [
+        "find_symbol charge_invoice Preserve decimal returns prices public cents wrong API",
+        "read_symbol charge_invoice",
+        "read_symbol test_decimal_price_uses_exact_cents",
+        "read_symbol compute_minor_units"
+      ]
+    },
+    {
+      "arm": "grep_loop",
+      "case": "security-authorization-scope",
+      "solved": true,
+      "required_evidence": [
+        "authorize_request",
+        "has_required_scope"
+      ],
+      "missing_evidence": [],
+      "turns": 11,
+      "final_transcript_tokens": 5543,
+      "no_cache_input_tokens": 38182,
+      "cached_input_tokens": 8782,
+      "new_tokens": 5477,
+      "calls": [
+        "grep authorize_request",
+        "read_file modules/mod_048.py",
+        "read_file modules/mod_080.py",
+        "read_file modules/mod_030.py",
+        "read_file modules/mod_035.py",
+        "read_file access.py",
+        "read_file modules/mod_016.py",
+        "read_file modules/mod_051.py",
+        "read_file modules/mod_081.py",
+        "read_file modules/mod_109.py",
+        "read_file policy.py"
+      ]
+    },
+    {
+      "arm": "map_expand",
+      "case": "security-authorization-scope",
+      "solved": true,
+      "required_evidence": [
+        "authorize_request",
+        "has_required_scope"
+      ],
+      "missing_evidence": [],
+      "turns": 4,
+      "final_transcript_tokens": 13009,
+      "no_cache_input_tokens": 51068,
+      "cached_input_tokens": 16783,
+      "new_tokens": 381,
+      "calls": [
+        "read_symbol test_write_only_credentials_are_rejected",
+        "read_symbol test_admin_credentials_are_accepted",
+        "read_symbol authorize_request",
+        "read_symbol has_required_scope"
+      ]
+    },
+    {
+      "arm": "map_query",
+      "case": "security-authorization-scope",
+      "solved": true,
+      "required_evidence": [
+        "authorize_request",
+        "has_required_scope"
+      ],
+      "missing_evidence": [],
+      "turns": 5,
+      "final_transcript_tokens": 863,
+      "no_cache_input_tokens": 2845,
+      "cached_input_tokens": 1030,
+      "new_tokens": 789,
+      "calls": [
+        "find_symbol authorize_request administrator credentials wrongly write Only only pass may",
+        "read_symbol authorize_request",
+        "read_symbol test_write_only_credentials_are_rejected",
+        "read_symbol test_admin_credentials_are_accepted",
+        "read_symbol has_required_scope"
+      ]
+    },
+    {
+      "arm": "grep_loop",
+      "case": "debug-retry-boundary",
+      "solved": false,
+      "required_evidence": [
+        "permits_another_attempt",
+        "execute_job"
+      ],
+      "missing_evidence": [
+        "permits_another_attempt",
+        "execute_job"
+      ],
+      "turns": 18,
+      "final_transcript_tokens": 11602,
+      "no_cache_input_tokens": 116331,
+      "cached_input_tokens": 22069,
+      "new_tokens": 11544,
+      "calls": [
+        "grep execute_job",
+        "read_file modules/mod_048.py",
+        "read_file modules/mod_030.py",
+        "read_file modules/mod_080.py",
+        "read_file modules/mod_109.py",
+        "grep boundary",
+        "grep false",
+        "grep three",
+        "grep value",
+        "read_file modules/mod_007.py",
+        "read_file modules/mod_006.py",
+        "read_file modules/mod_003.py",
+        "read_file modules/mod_004.py",
+        "read_file modules/mod_005.py",
+        "read_file modules/mod_001.py",
+        "read_file modules/mod_002.py",
+        "grep true",
+        "grep two"
+      ]
+    },
+    {
+      "arm": "map_expand",
+      "case": "debug-retry-boundary",
+      "solved": true,
+      "required_evidence": [
+        "permits_another_attempt",
+        "execute_job"
+      ],
+      "missing_evidence": [],
+      "turns": 4,
+      "final_transcript_tokens": 12780,
+      "no_cache_input_tokens": 50690,
+      "cached_input_tokens": 16535,
+      "new_tokens": 185,
+      "calls": [
+        "read_symbol test_third_attempt_is_the_final_attempt",
+        "read_symbol test_second_attempt_can_retry",
+        "read_symbol execute_job",
+        "read_symbol permits_another_attempt"
+      ]
+    },
+    {
+      "arm": "map_query",
+      "case": "debug-retry-boundary",
+      "solved": true,
+      "required_evidence": [
+        "permits_another_attempt",
+        "execute_job"
+      ],
+      "missing_evidence": [],
+      "turns": 5,
+      "final_transcript_tokens": 563,
+      "no_cache_input_tokens": 1888,
+      "cached_input_tokens": 660,
+      "new_tokens": 497,
+      "calls": [
+        "find_symbol execute_job boundary false three value true two",
+        "read_symbol test_third_attempt_is_the_final_attempt",
+        "read_symbol test_second_attempt_can_retry",
+        "read_symbol execute_job",
+        "read_symbol permits_another_attempt"
+      ]
+    },
+    {
+      "arm": "grep_loop",
+      "case": "debug-unicode-slug",
+      "solved": false,
+      "required_evidence": [
+        "make_slug",
+        "test_accented_title_is_ascii",
+        "normalize_title"
+      ],
+      "missing_evidence": [
+        "make_slug",
+        "test_accented_title_is_ascii",
+        "normalize_title"
+      ],
+      "turns": 10,
+      "final_transcript_tokens": 9046,
+      "no_cache_input_tokens": 35036,
+      "cached_input_tokens": 10552,
+      "new_tokens": 8997,
+      "calls": [
+        "grep diacritics",
+        "read_file modules/mod_048.py",
+        "read_file modules/mod_030.py",
+        "read_file modules/mod_080.py",
+        "read_file modules/mod_109.py",
+        "grep make_slug",
+        "grep output",
+        "grep ASCII",
+        "grep emits",
+        "grep non"
+      ]
+    },
+    {
+      "arm": "map_expand",
+      "case": "debug-unicode-slug",
+      "solved": true,
+      "required_evidence": [
+        "make_slug",
+        "test_accented_title_is_ascii",
+        "normalize_title"
+      ],
+      "missing_evidence": [],
+      "turns": 3,
+      "final_transcript_tokens": 12581,
+      "no_cache_input_tokens": 37501,
+      "cached_input_tokens": 15036,
+      "new_tokens": 130,
+      "calls": [
+        "read_symbol test_accented_title_is_ascii",
+        "read_symbol make_slug",
+        "read_symbol normalize_title"
+      ]
+    },
+    {
+      "arm": "map_query",
+      "case": "debug-unicode-slug",
+      "solved": true,
+      "required_evidence": [
+        "make_slug",
+        "test_accented_title_is_ascii",
+        "normalize_title"
+      ],
+      "missing_evidence": [],
+      "turns": 4,
+      "final_transcript_tokens": 598,
+      "no_cache_input_tokens": 1580,
+      "cached_input_tokens": 659,
+      "new_tokens": 541,
+      "calls": [
+        "find_symbol diacritics make_slug output ASCII emits non",
+        "read_symbol make_slug",
+        "read_symbol test_accented_title_is_ascii",
+        "read_symbol normalize_title"
+      ]
+    }
+  ],
+  "note": "scripted policies, no model: tool-economics evidence only"
+}

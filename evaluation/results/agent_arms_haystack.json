@@ -1,0 +1,421 @@
+{
+  "cases": 6,
+  "test_hint": true,
+  "summary": {
+    "grep_loop": {
+      "cases": 6,
+      "solved": 6,
+      "mean_turns": 3.0,
+      "mean_no_cache_input_tokens": 428,
+      "mean_cached_input_tokens": 233,
+      "mean_final_transcript_tokens": 255
+    },
+    "map_expand": {
+      "cases": 6,
+      "solved": 6,
+      "mean_turns": 3.5,
+      "mean_no_cache_input_tokens": 44287,
+      "mean_cached_input_tokens": 15884,
+      "mean_final_transcript_tokens": 12809
+    },
+    "map_query": {
+      "cases": 6,
+      "solved": 6,
+      "mean_turns": 5.67,
+      "mean_no_cache_input_tokens": 2645,
+      "mean_cached_input_tokens": 860,
+      "mean_final_transcript_tokens": 744
+    }
+  },
+  "runs": [
+    {
+      "arm": "grep_loop",
+      "case": "debug-empty-cart",
+      "solved": true,
+      "required_evidence": [
+        "submit_order",
+        "validate_amount",
+        "test_empty_cart_is_rejected"
+      ],
+      "missing_evidence": [],
+      "turns": 3,
+      "final_transcript_tokens": 354,
+      "no_cache_input_tokens": 463,
+      "cached_input_tokens": 275,
+      "new_tokens": 299,
+      "calls": [
+        "read_file tests/test_checkout.py",
+        "read_file checkout.py",
+        "read_file payments.py"
+      ]
+    },
+    {
+      "arm": "map_expand",
+      "case": "debug-empty-cart",
+      "solved": true,
+      "required_evidence": [
+        "submit_order",
+        "validate_amount",
+        "test_empty_cart_is_rejected"
+      ],
+      "missing_evidence": [],
+      "turns": 4,
+      "final_transcript_tokens": 12772,
+      "no_cache_input_tokens": 50484,
+      "cached_input_tokens": 16477,
+      "new_tokens": 242,
+      "calls": [
+        "read_symbol test_empty_cart_is_rejected",
+        "read_symbol submit_order",
+        "read_symbol checkout_total",
+        "read_symbol validate_amount"
+      ]
+    },
+    {
+      "arm": "map_query",
+      "case": "debug-empty-cart",
+      "solved": true,
+      "required_evidence": [
+        "submit_order",
+        "validate_amount",
+        "test_empty_cart_is_rejected"
+      ],
+      "missing_evidence": [],
+      "turns": 7,
+      "final_transcript_tokens": 674,
+      "no_cache_input_tokens": 2885,
+      "cached_input_tokens": 828,
+      "new_tokens": 611,
+      "calls": [
+        "find_symbol submit_order collection",
+        "read_symbol CheckoutTest",
+        "read_symbol test_empty_cart_is_rejected",
+        "read_symbol submit_order",
+        "read_symbol PaymentGateway",
+        "read_symbol checkout_total",
+        "read_symbol validate_amount"
+      ]
+    },
+    {
+      "arm": "grep_loop",
+      "case": "debug-malformed-payload",
+      "solved": true,
+      "required_evidence": [
+        "process_request",
+        "test_malformed_input_is_rejected",
+        "sanitize_payload"
+      ],
+      "missing_evidence": [],
+      "turns": 3,
+      "final_transcript_tokens": 231,
+      "no_cache_input_tokens": 401,
+      "cached_input_tokens": 211,
+      "new_tokens": 167,
+      "calls": [
+        "read_file tests/test_api.py",
+        "read_file api.py",
+        "read_file validation.py"
+      ]
+    },
+    {
+      "arm": "map_expand",
+      "case": "debug-malformed-payload",
+      "solved": true,
+      "required_evidence": [
+        "process_request",
+        "test_malformed_input_is_rejected",
+        "sanitize_payload"
+      ],
+      "missing_evidence": [],
+      "turns": 3,
+      "final_transcript_tokens": 12974,
+      "no_cache_input_tokens": 37995,
+      "cached_input_tokens": 15239,
+      "new_tokens": 366,
+      "calls": [
+        "read_symbol test_malformed_input_is_rejected",
+        "read_symbol process_request",
+        "read_symbol sanitize_payload"
+      ]
+    },
+    {
+      "arm": "map_query",
+      "case": "debug-malformed-payload",
+      "solved": true,
+      "required_evidence": [
+        "process_request",
+        "test_malformed_input_is_rejected",
+        "sanitize_payload"
+      ],
+      "missing_evidence": [],
+      "turns": 5,
+      "final_transcript_tokens": 796,
+      "no_cache_input_tokens": 1823,
+      "cached_input_tokens": 662,
+      "new_tokens": 724,
+      "calls": [
+        "find_symbol process_request ValueError malformed requests crashes invalid input",
+        "read_symbol process_request",
+        "read_symbol ApiTest",
+        "read_symbol test_malformed_input_is_rejected",
+        "read_symbol sanitize_payload"
+      ]
+    },
+    {
+      "arm": "grep_loop",
+      "case": "debug-currency-rounding",
+      "solved": true,
+      "required_evidence": [
+        "charge_invoice",
+        "compute_minor_units"
+      ],
+      "missing_evidence": [],
+      "turns": 3,
+      "final_transcript_tokens": 211,
+      "no_cache_input_tokens": 390,
+      "cached_input_tokens": 205,
+      "new_tokens": 146,
+      "calls": [
+        "read_file tests/test_billing.py",
+        "read_file billing.py",
+        "read_file money.py"
+      ]
+    },
+    {
+      "arm": "map_expand",
+      "case": "debug-currency-rounding",
+      "solved": true,
+      "required_evidence": [
+        "charge_invoice",
+        "compute_minor_units"
+      ],
+      "missing_evidence": [],
+      "turns": 3,
+      "final_transcript_tokens": 12729,
+      "no_cache_input_tokens": 37948,
+      "cached_input_tokens": 15218,
+      "new_tokens": 131,
+      "calls": [
+        "read_symbol test_decimal_price_uses_exact_cents",
+        "read_symbol charge_invoice",
+        "read_symbol compute_minor_units"
+      ]
+    },
+    {
+      "arm": "map_query",
+      "case": "debug-currency-rounding",
+      "solved": true,
+      "required_evidence": [
+        "charge_invoice",
+        "compute_minor_units"
+      ],
+      "missing_evidence": [],
+      "turns": 5,
+      "final_transcript_tokens": 631,
+      "no_cache_input_tokens": 2112,
+      "cached_input_tokens": 747,
+      "new_tokens": 558,
+      "calls": [
+        "find_symbol charge_invoice Preserve decimal returns prices public cents wrong API",
+        "read_symbol charge_invoice",
+        "read_symbol BillingTest",
+        "read_symbol test_decimal_price_uses_exact_cents",
+        "read_symbol compute_minor_units"
+      ]
+    },
+    {
+      "arm": "grep_loop",
+      "case": "security-authorization-scope",
+      "solved": true,
+      "required_evidence": [
+        "authorize_request",
+        "has_required_scope"
+      ],
+      "missing_evidence": [],
+      "turns": 3,
+      "final_transcript_tokens": 290,
+      "no_cache_input_tokens": 527,
+      "cached_input_tokens": 288,
+      "new_tokens": 220,
+      "calls": [
+        "read_file tests/test_access.py",
+        "read_file access.py",
+        "read_file policy.py"
+      ]
+    },
+    {
+      "arm": "map_expand",
+      "case": "security-authorization-scope",
+      "solved": true,
+      "required_evidence": [
+        "authorize_request",
+        "has_required_scope"
+      ],
+      "missing_evidence": [],
+      "turns": 4,
+      "final_transcript_tokens": 13012,
+      "no_cache_input_tokens": 51080,
+      "cached_input_tokens": 16787,
+      "new_tokens": 381,
+      "calls": [
+        "read_symbol test_write_only_credentials_are_rejected",
+        "read_symbol test_admin_credentials_are_accepted",
+        "read_symbol authorize_request",
+        "read_symbol has_required_scope"
+      ]
+    },
+    {
+      "arm": "map_query",
+      "case": "security-authorization-scope",
+      "solved": true,
+      "required_evidence": [
+        "authorize_request",
+        "has_required_scope"
+      ],
+      "missing_evidence": [],
+      "turns": 6,
+      "final_transcript_tokens": 1000,
+      "no_cache_input_tokens": 4001,
+      "cached_input_tokens": 1269,
+      "new_tokens": 922,
+      "calls": [
+        "find_symbol authorize_request administrator credentials wrongly write Only only pass may",
+        "read_symbol authorize_request",
+        "read_symbol AccessTest",
+        "read_symbol test_write_only_credentials_are_rejected",
+        "read_symbol test_admin_credentials_are_accepted",
+        "read_symbol has_required_scope"
+      ]
+    },
+    {
+      "arm": "grep_loop",
+      "case": "debug-retry-boundary",
+      "solved": true,
+      "required_evidence": [
+        "permits_another_attempt",
+        "execute_job"
+      ],
+      "missing_evidence": [],
+      "turns": 3,
+      "final_transcript_tokens": 241,
+      "no_cache_input_tokens": 434,
+      "cached_input_tokens": 232,
+      "new_tokens": 179,
+      "calls": [
+        "read_file tests/test_worker.py",
+        "read_file worker.py",
+        "read_file retry_policy.py"
+      ]
+    },
+    {
+      "arm": "map_expand",
+      "case": "debug-retry-boundary",
+      "solved": true,
+      "required_evidence": [
+        "permits_another_attempt",
+        "execute_job"
+      ],
+      "missing_evidence": [],
+      "turns": 4,
+      "final_transcript_tokens": 12784,
+      "no_cache_input_tokens": 50706,
+      "cached_input_tokens": 16540,
+      "new_tokens": 185,
+      "calls": [
+        "read_symbol test_third_attempt_is_the_final_attempt",
+        "read_symbol test_second_attempt_can_retry",
+        "read_symbol execute_job",
+        "read_symbol permits_another_attempt"
+      ]
+    },
+    {
+      "arm": "map_query",
+      "case": "debug-retry-boundary",
+      "solved": true,
+      "required_evidence": [
+        "permits_another_attempt",
+        "execute_job"
+      ],
+      "missing_evidence": [],
+      "turns": 6,
+      "final_transcript_tokens": 676,
+      "no_cache_input_tokens": 2746,
+      "cached_input_tokens": 847,
+      "new_tokens": 606,
+      "calls": [
+        "find_symbol execute_job boundary false three value true two",
+        "read_symbol WorkerTest",
+        "read_symbol test_third_attempt_is_the_final_attempt",
+        "read_symbol test_second_attempt_can_retry",
+        "read_symbol execute_job",
+        "read_symbol permits_another_attempt"
+      ]
+    },
+    {
+      "arm": "grep_loop",
+      "case": "debug-unicode-slug",
+      "solved": true,
+      "required_evidence": [
+        "make_slug",
+        "test_accented_title_is_ascii",
+        "normalize_title"
+      ],
+      "missing_evidence": [],
+      "turns": 3,
+      "final_transcript_tokens": 204,
+      "no_cache_input_tokens": 350,
+      "cached_input_tokens": 187,
+      "new_tokens": 151,
+      "calls": [
+        "read_file tests/test_slugs.py",
+        "read_file slugs.py",
+        "read_file text_normalization.py"
+      ]
+    },
+    {
+      "arm": "map_expand",
+      "case": "debug-unicode-slug",
+      "solved": true,
+      "required_evidence": [
+        "make_slug",
+        "test_accented_title_is_ascii",
+        "normalize_title"
+      ],
+      "missing_evidence": [],
+      "turns": 3,
+      "final_transcript_tokens": 12584,
+      "no_cache_input_tokens": 37510,
+      "cached_input_tokens": 15040,
+      "new_tokens": 130,
+      "calls": [
+        "read_symbol test_accented_title_is_ascii",
+        "read_symbol make_slug",
+        "read_symbol normalize_title"
+      ]
+    },
+    {
+      "arm": "map_query",
+      "case": "debug-unicode-slug",
+      "solved": true,
+      "required_evidence": [
+        "make_slug",
+        "test_accented_title_is_ascii",
+        "normalize_title"
+      ],
+      "missing_evidence": [],
+      "turns": 5,
+      "final_transcript_tokens": 685,
+      "no_cache_input_tokens": 2302,
+      "cached_input_tokens": 810,
+      "new_tokens": 624,
+      "calls": [
+        "find_symbol diacritics make_slug output ASCII emits non",
+        "read_symbol make_slug",
+        "read_symbol SlugTest",
+        "read_symbol test_accented_title_is_ascii",
+        "read_symbol normalize_title"
+      ]
+    }
+  ],
+  "note": "scripted policies, no model: tool-economics evidence only"
+}

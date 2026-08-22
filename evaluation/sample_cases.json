@@ -1,0 +1,22 @@
+[
+  {
+    "id": "debug-empty-cart",
+    "query": "fix submit_order failing for an empty cart",
+    "task_type": "debug",
+    "expected_symbols": [
+      "submit_order",
+      "validate_amount",
+      "test_empty_cart_is_rejected"
+    ]
+  },
+  {
+    "id": "refactor-payment-validation",
+    "query": "refactor validate_amount and update all callers",
+    "task_type": "refactor",
+    "expected_symbols": [
+      "validate_amount",
+      "submit_order"
+    ]
+  }
+]
+

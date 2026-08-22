@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "graph-context-compiler"
+version = "0.1.0"
+description = "Graph-guided context retrieval for terminal coding agents"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [{name = "Graph Context Compiler contributors"}]
+dependencies = []
+
+[project.scripts]
+context-compiler = "context_compiler.cli:main"
+context-compiler-mcp = "context_compiler.mcp_server:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
