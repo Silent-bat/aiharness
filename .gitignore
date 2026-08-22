@@ -17,3 +17,4 @@ build/
 evaluation/haystack/
 evaluation/haystack_cases.json
 
+evaluation/haystack_200k/

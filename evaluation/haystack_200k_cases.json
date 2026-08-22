@@ -1,0 +1,261 @@
+[
+  {
+    "id": "debug-empty-cart",
+    "repository": "evaluation/haystack_200k/haystack_empty_cart_bug",
+    "prompt": "submit_order accepts an empty collection; reject it.",
+    "task_type": "debug",
+    "test_command": "python3 -m unittest discover -s tests -v",
+    "mock_requires": [
+      "submit_order",
+      "def validate_amount",
+      "test_empty_cart_is_rejected"
+    ],
+    "mock_files": {
+      "payments.py": "class PaymentGateway:\n    def capture(self, amount: int) -> str:\n        return \"payment-accepted\"\n\n\ndef validate_amount(amount: int) -> None:\n    if amount <= 0:\n        raise ValueError(\"amount must be positive\")\n"
+    },
+    "labels": {
+      "relevant_files": [
+        "checkout.py",
+        "payments.py"
+      ],
+      "relevant_symbols": [
+        "submit_order",
+        "validate_amount"
+      ],
+      "callers": [
+        "submit_order"
+      ],
+      "fix_location": {
+        "file": "payments.py",
+        "symbol": "validate_amount"
+      },
+      "tests": [
+        "tests/test_checkout.py"
+      ],
+      "test_symbols": [
+        "test_empty_cart_is_rejected"
+      ],
+      "expected_behavior": "submit_order([]) raises ValueError because validate_amount rejects non-positive totals."
+    },
+    "oracle_context": [
+      "checkout.py",
+      "payments.py",
+      "tests/test_checkout.py"
+    ]
+  },
+  {
+    "id": "debug-malformed-payload",
+    "repository": "evaluation/haystack_200k/haystack_malformed_payload_bug",
+    "prompt": "process_request crashes on malformed input. Reject invalid requests with ValueError.",
+    "task_type": "debug",
+    "test_command": "python3 -m unittest discover -s tests -v",
+    "mock_requires": [
+      "process_request",
+      "def sanitize_payload"
+    ],
+    "mock_files": {
+      "validation.py": "def sanitize_payload(payload):\n    if not isinstance(payload, dict):\n        raise ValueError(\"payload must be a mapping\")\n    return {key: value.strip() for key, value in payload.items()}\n"
+    },
+    "labels": {
+      "relevant_files": [
+        "api.py",
+        "validation.py"
+      ],
+      "relevant_symbols": [
+        "process_request",
+        "sanitize_payload"
+      ],
+      "callers": [
+        "process_request"
+      ],
+      "fix_location": {
+        "file": "validation.py",
+        "symbol": "sanitize_payload"
+      },
+      "tests": [
+        "tests/test_api.py"
+      ],
+      "test_symbols": [
+        "test_malformed_input_is_rejected"
+      ],
+      "expected_behavior": "process_request raises ValueError on non-mapping or missing-key payloads instead of crashing."
+    },
+    "oracle_context": [
+      "api.py",
+      "validation.py",
+      "tests/test_api.py"
+    ]
+  },
+  {
+    "id": "debug-currency-rounding",
+    "repository": "evaluation/haystack_200k/haystack_currency_rounding_bug",
+    "prompt": "charge_invoice returns the wrong cents for decimal prices. Preserve the public API.",
+    "task_type": "debug",
+    "test_command": "python3 -m unittest discover -s tests -v",
+    "mock_requires": [
+      "charge_invoice",
+      "def compute_minor_units"
+    ],
+    "mock_files": {
+      "money.py": "from decimal import Decimal\n\n\ndef compute_minor_units(amount):\n    return int(Decimal(str(amount)) * 100)\n"
+    },
+    "labels": {
+      "relevant_files": [
+        "billing.py",
+        "money.py"
+      ],
+      "relevant_symbols": [
+        "charge_invoice",
+        "compute_minor_units"
+      ],
+      "callers": [
+        "charge_invoice"
+      ],
+      "fix_location": {
+        "file": "money.py",
+        "symbol": "compute_minor_units"
+      },
+      "tests": [
+        "tests/test_billing.py"
+      ],
+      "test_symbols": [
+        "test_decimal_price_rounds_to_cents"
+      ],
+      "expected_behavior": "compute_minor_units rounds decimal prices to the nearest cent rather than truncating; charge_invoice signature unchanged."
+    },
+    "oracle_context": [
+      "billing.py",
+      "money.py",
+      "tests/test_billing.py"
+    ]
+  },
+  {
+    "id": "security-authorization-scope",
+    "repository": "evaluation/haystack_200k/haystack_authorization_scope_bug",
+    "prompt": "authorize_request wrongly accepts write-only credentials. Only administrator credentials may pass.",
+    "task_type": "security",
+    "test_command": "python3 -m unittest discover -s tests -v",
+    "mock_requires": [
+      "authorize_request",
+      "def has_required_scope"
+    ],
+    "mock_files": {
+      "policy.py": "def has_required_scope(scopes):\n    return \"admin\" in scopes\n"
+    },
+    "labels": {
+      "relevant_files": [
+        "access.py",
+        "policy.py"
+      ],
+      "relevant_symbols": [
+        "authorize_request",
+        "has_required_scope"
+      ],
+      "callers": [
+        "authorize_request"
+      ],
+      "fix_location": {
+        "file": "policy.py",
+        "symbol": "has_required_scope"
+      },
+      "tests": [
+        "tests/test_access.py"
+      ],
+      "test_symbols": [
+        "test_write_only_credential_is_rejected"
+      ],
+      "expected_behavior": "has_required_scope grants access only when the administrator scope is present."
+    },
+    "oracle_context": [
+      "access.py",
+      "policy.py",
+      "tests/test_access.py"
+    ]
+  },
+  {
+    "id": "debug-retry-boundary",
+    "repository": "evaluation/haystack_200k/haystack_retry_boundary_bug",
+    "prompt": "At boundary value three, execute_job must be false; at two it must be true.",
+    "task_type": "debug",
+    "test_command": "python3 -m unittest discover -s tests -v",
+    "mock_requires": [
+      "execute_job",
+      "def permits_another_attempt"
+    ],
+    "mock_files": {
+      "retry_policy.py": "def permits_another_attempt(attempts):\n    return attempts < 3\n"
+    },
+    "labels": {
+      "relevant_files": [
+        "worker.py",
+        "retry_policy.py"
+      ],
+      "relevant_symbols": [
+        "execute_job",
+        "permits_another_attempt"
+      ],
+      "callers": [
+        "execute_job"
+      ],
+      "fix_location": {
+        "file": "retry_policy.py",
+        "symbol": "permits_another_attempt"
+      },
+      "tests": [
+        "tests/test_worker.py"
+      ],
+      "test_symbols": [
+        "test_retry_boundary"
+      ],
+      "expected_behavior": "permits_another_attempt is true at two prior attempts and false at three."
+    },
+    "oracle_context": [
+      "worker.py",
+      "retry_policy.py",
+      "tests/test_worker.py"
+    ]
+  },
+  {
+    "id": "debug-unicode-slug",
+    "repository": "evaluation/haystack_200k/haystack_unicode_slug_bug",
+    "prompt": "make_slug emits non-ASCII output for diacritics.",
+    "task_type": "debug",
+    "test_command": "python3 -m unittest discover -s tests -v",
+    "mock_requires": [
+      "make_slug",
+      "def normalize_title"
+    ],
+    "mock_files": {
+      "text_normalization.py": "import unicodedata\n\n\ndef normalize_title(title):\n    ascii_title = unicodedata.normalize(\"NFKD\", title).encode(\"ascii\", \"ignore\").decode(\"ascii\")\n    return ascii_title.lower().replace(\" \", \"-\")\n"
+    },
+    "labels": {
+      "relevant_files": [
+        "slugs.py",
+        "text_normalization.py"
+      ],
+      "relevant_symbols": [
+        "make_slug",
+        "normalize_title"
+      ],
+      "callers": [
+        "make_slug"
+      ],
+      "fix_location": {
+        "file": "text_normalization.py",
+        "symbol": "normalize_title"
+      },
+      "tests": [
+        "tests/test_slugs.py"
+      ],
+      "test_symbols": [
+        "test_accented_title_is_ascii"
+      ],
+      "expected_behavior": "normalize_title folds diacritics to ASCII so make_slug('Creme Brulee' with accents) == 'creme-brulee'."
+    },
+    "oracle_context": [
+      "slugs.py",
+      "text_normalization.py",
+      "tests/test_slugs.py"
+    ]
+  }
+]

@@ -456,30 +456,94 @@ exactly when the required evidence is present, so these curves measure how
 efficiently each arm retains that evidence per token, not how a model behaves once
 it has it.
 
-### First live 8-arm run, and why its headline is not yet a result
+### Third regime: a 640-module repository against a 200,000-token budget
 
-`evaluation/results/live_haystack_ablation_4000.json` is a real run against
-`stealth/ox-alpha` over OpenRouter, six haystack tasks, one budget (4,000 tokens),
-per-call cache-busting on. It reads `graphrag` 6/6 and `graph_only` 6/6 against
-`classic` 3/6 and `full_file` 3/6, with `oracle` 6/6 at 379 context tokens.
+`evaluation/haystack.py --modules 640 --seed 7` builds six repositories of 645 files
+each, 204,003–211,320 estimated tokens, so the corpus is roughly the size of the
+budget rather than ten times it. Mock, 200,000-token budget, `--max-items 4000`
+(`evaluation/results/mock_200k_ablation.json`):
 
-That file is committed as-is, and it should not be quoted as evidence, for three
-reasons:
+| arm | solved | mean context tokens | mean items |
+| --- | --- | --- | --- |
+| `oracle` | 6/6 | **380** | 3 |
+| `graph_only` | 6/6 | **15,838** | 191 |
+| `graphrag` | 6/6 | 98,178 | 1,470 |
+| `lexical_vector_graph` | 6/6 | 137,308 | 2,079 |
+| `vector` | 3/6 | 127,275 | 1,933 |
+| `lexical_vector` | 3/6 | 128,771 | 1,954 |
+| `classic` | 2/6 | 92,352 | 1,404 |
+| `full_file` | 2/6 | 199,976 | 543 files of 645 |
 
-1. **One of `classic`'s three failures is void, not wrong.** On
-   `security-authorization-scope` the provider returned no content and no usage
-   block, which the harness at the time scored as a failed task. That is a third of
-   the baseline's recorded failures. It also broke the cost comparison in the
-   baseline's favour: the void trial's input tokens went unrecorded, so the entire
-   apparent +2,895-token gap against `graphrag` comes from one missing usage block.
-   `RunResult.void` now records this, `success_rate_graded` reports over answered
-   trials only, and void pairs are dropped from the paired test.
-2. **Six tasks cannot reach significance.** Three discordant pairs all favouring the
-   treatment give a two-sided exact p of 0.125. No arrangement of six tasks clears
-   0.05, so this run is a smoke test of the harness, not a measurement.
-3. **The fixtures are cross-file by construction**, which is the regime the graph is
-   built for. Real single-file fixes, where lexical search suffices, are absent by
-   selection.
+This is the cleanest separation in the project, and it is a **precision** result, not
+a reach result. Three things carry:
+
+1. `graph_only` matches `graphrag` for 6x fewer tokens, so in this regime the lexical
+   half of the product arm adds cost and buys no successes — the third independent
+   result saying so.
+2. `graph_only` self-limits to 174–203 items against a 4,000-item cap. Graph
+   traversal has a bounded frontier, which is the "knows when to stop" property every
+   budget-filling arm lacks and `oracle` has by construction.
+3. `classic` fails on tasks where it used only 27,586 of its 200,000 tokens. It
+   exhausted *candidates*, not budget, so its failure mode is candidate generation
+   rather than packing — a distinction the small fixtures cannot show.
+
+**Do not read `full_file` 2/6 as long-context degradation.** It truncates at exactly
+the 200,000 budget (543 of 645 files) because the corpus is ~205k, so on four tasks
+the fix site sat in the discarded remainder. That is an artefact of choosing 640
+modules. The mock client cannot detect context rot in any case: a substring check does
+not get confused by 200k tokens. Only a live run can test that, and it has not been
+run.
+
+### Live 8-arm runs: the success claim does not survive replication
+
+Two live runs against `stealth/ox-alpha` over OpenRouter, six haystack tasks, one
+budget (4,000 tokens), per-call cache-busting on, identical in every respect except
+that the second run has void accounting:
+
+| arm | run 1 | run 2 | mean context tokens | output tokens, run 1 → 2 |
+| --- | --- | --- | --- | --- |
+| `classic` | 3/6 | **6/6** | 3,974 | 7,077 → 10,236 |
+| `graphrag` | 6/6 | 6/6 | 3,980 | 9,295 → 9,242 |
+| `graph_only` | 6/6 | 6/6 | 3,975 | **3,215 → 3,713** |
+| `full_file` | 3/6 | 4/6 | 3,976 | 6,964 → 10,900 |
+| `vector` | 5/6 | 5/6 | 3,964 | 10,572 → 10,825 |
+| `lexical_vector` | 5/6 | 4/6 | 3,974 | 7,863 → 11,628 |
+| `lexical_vector_graph` | 5/6 | 5/6 | 3,980 | 5,623 → 8,811 |
+| `oracle` | 6/6 | 6/6 | **379** | 2,320 → 1,778 |
+
+`evaluation/results/live_haystack_ablation_4000.json` and `..._v2.json`.
+
+**The GraphRAG success advantage was run-to-run variance.** `classic` moved from 3/6
+to 6/6 on replication, so discordant pairs went 3 → 0 and the paired two-sided exact
+p went 0.125 → 1.0. Other arms moved in both directions. One arm's variance is larger
+than the between-arm effect the whole benchmark was built to detect, which
+retroactively invalidates every single-run comparison here, mock ones included. Six
+tasks was never the binding problem; one run was.
+
+Two caveats on run 1 specifically, both now fixed in the harness: one of `classic`'s
+failures was a **void trial** — the provider returned no content and no usage block,
+which was scored as a failed task, and whose missing usage produced the entire
+apparent +2,895-token gap against `graphrag`. `RunResult.void` records this,
+`success_rate_graded` reports over answered trials only, and void pairs are dropped
+from the paired test. Run 2 has zero voids, so replication is not explained by it.
+
+**What did reproduce is continuous, not binary.** Uncached input tokens were lower for
+`graphrag` on all six pairs in run 2 (deltas -131, -54, -152, -96, -80, -26), so the
+iso-token property holds. More usefully, output tokens track context precision:
+`graph_only` emitted ~2.8x fewer output tokens than `classic` in both runs at
+identical context size, and `oracle` fewer still at 379 context tokens. Cleaner
+context means less model floundering, and that separated cleanly where success was
+pure noise.
+
+The methodological conclusion, which the rest of this evaluation should be read
+through: **on task counts this small, report budget-at-fixed-success and output cost,
+not success-at-fixed-budget.** `budget_sweep.py::_tokens_to_reach` already computes
+the former. Any success delta needs `--repetitions` and a variance estimate before it
+means anything.
+
+A third caveat applies to both runs: the fixtures are cross-file by construction,
+which is the regime the graph is built for. Real single-file fixes, where lexical
+search suffices, are absent by selection.
 
 ## Turn economics: what a terminal agent actually pays
 
@@ -606,11 +670,56 @@ The highest-value next steps are:
 
 ## Research claim
 
-A defensible hypothesis for this system is:
+The hypothesis this harness was built to test was:
 
-> Task-conditioned hybrid graph retrieval improves repository-level coding
-> task success and relevant-symbol recall under a fixed context budget compared
-> with lexical or vector retrieval alone.
+> Task-conditioned hybrid graph retrieval improves repository-level coding task
+> success and relevant-symbol recall under a fixed context budget compared with
+> lexical or vector retrieval alone.
 
-The implementation is structured so that each retrieval component can be
-disabled or replaced for controlled experiments.
+**On success, the current evidence does not support it and partly contradicts it.**
+The one live comparison that appeared to show it did not replicate: `classic` moved
+3/6 → 6/6 on a rerun, taking the paired exact p from 0.125 to 1.0. Mock results
+separate the arms cleanly but are circular by construction, and the arm ranking
+flips with repository size, so no mock number transfers. The recall half of the
+claim still holds, and the iso-token half holds (uncached input was lower for
+`graphrag` on all six live pairs), but recall was never the interesting part.
+
+Two findings did survive everything:
+
+- **Output cost tracks context precision.** `graph_only` emitted ~2.8x fewer output
+  tokens than `classic` at identical context size, in both live runs, and `oracle`
+  fewer still. This is a continuous endpoint that reproduced where binary success
+  was noise.
+- **Mixing lexical and vector evidence into the graph arm hurts** under near-miss
+  distractors — shown independently in the 39k haystack, the 200k haystack, and the
+  budget sweep. The weighted-sum fusion over incomparable score scales is a defect,
+  not a tuning parameter.
+
+So the honest revised claim is narrower and testable:
+
+> Under a fixed context budget, graph-conditioned retrieval reaches a target success
+> rate at a lower token budget, and induces fewer output tokens at equal context
+> size, than lexical or vector retrieval — while binary success at a single budget
+> is dominated by run-to-run variance on task sets of this size.
+
+What that requires, in order:
+
+1. **Variance first.** No arm comparison is admissible without `--repetitions` and a
+   within-arm interval. One arm's swing currently exceeds the effect being chased.
+2. **Switch the primary endpoint** from success-at-fixed-budget to
+   budget-at-fixed-success (`budget_sweep.py::_tokens_to_reach`), with `oracle` as
+   the information floor and `full_file` as the ceiling.
+3. **Promote output tokens and latency to co-primary**, since they reproduced.
+4. **Replace weighted-sum fusion** with rank-normalized fusion or conditional
+   escalation (graph first; lexical only on an empty frontier).
+5. **Build an explicit sufficiency stopping rule**, generalizing the bounded graph
+   frontier that lets `graph_only` self-limit to ~191 items under a 4,000-item cap.
+6. **Replicate on real repositories** — SWE-bench Lite with test names withheld,
+   stratified by gold-patch file count, pre-registered.
+
+The implementation is structured so that each retrieval component can be disabled or
+replaced for controlled experiments; the `oracle` arm is the most useful diagnostic
+in the table, because at 379 tokens and 3 items it shows every deployable arm
+overspending by 10–240x. That arm-versus-oracle precision gap is the largest
+measurable quantity in the project, and it is larger than any graphrag-versus-classic
+success difference yet observed.
