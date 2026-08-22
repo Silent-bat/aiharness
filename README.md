@@ -494,6 +494,48 @@ modules. The mock client cannot detect context rot in any case: a substring chec
 not get confused by 200k tokens. Only a live run can test that, and it has not been
 run.
 
+#### The new arms in the 200k regime: escalation transfers, RRF does not
+
+Same corpus and budget, with the fusion arms added:
+
+| arm | solved | mean context tokens | items |
+| --- | --- | --- | --- |
+| oracle | 6/6 | 380 | 3 |
+| graph_only | 6/6 | 15,838 | 192 |
+| graph_escalate | 6/6 | 20,811 | 192 |
+| graph_escalate_vector | 6/6 | 41,365 | 378 |
+| graphrag | 6/6 | 98,178 | 1,470 |
+| graphrag_rrf | 6/6 | 100,849 | 1,520 |
+| classic | 2/6 | 92,352 | 1,429 |
+
+Escalation's advantage reproduces across regimes: 6/6 at 20,811 tokens against
+`graphrag`'s 98,178, a 4.7x reduction at equal success. **RRF's failure does not.**
+Here `graphrag_rrf` matches `graphrag` at 6/6 and costs slightly more, where in the
+39k regime it broke the arm outright (5/6 to 3/6). So "RRF makes things worse" is a
+39k result, not a general one; what generalizes is that escalation beats both.
+
+One cost to name: `graph_escalate` spends 31% more than `graph_only` (20,811 vs
+15,838) for the same 6/6 and the same 192 items. Same items, more tokens -- it admits
+the same nodes at richer detail levels. That is the price of the empty-frontier
+fallback, and it is larger here than at 39k.
+
+#### The stopping rule at 200k: a 10x cut, and the same collapse
+
+| arm | off | on | mean unused budget | conditions fired |
+| --- | --- | --- | --- | --- |
+| graph_only | 6/6 @ 15,838t / 192i | **6/6 @ 1,516t / 14i** | 198,484 | closure 2, flat tail 4 |
+| graph_escalate | 6/6 @ 20,811t / 192i | **6/6 @ 1,809t / 14i** | 198,190 | closure 2, flat tail 4 |
+| graphrag | 6/6 @ 98,178t / 1,470i | 0/6 @ 2,437t / 25i | 197,565 | flat tail 6 |
+| classic | 2/6 @ 92,352t / 1,429i | 0/6 @ 3,535t / 47i | 196,462 | flat tail 6 |
+| oracle | 6/6 @ 380t / 3i | 6/6 @ 380t / 3i | 199,620 | not applicable |
+
+The rule scales with the regime rather than washing out in it: 10.4x and 11.5x
+reductions at unchanged 6/6, leaving 99.1% of a 200,000-token budget unspent. The
+graph arms now sit 4.0x and 4.8x from the oracle floor instead of 42x and 55x. And
+the collapse of the lexically-fused arms reproduces exactly -- `graphrag` 6/6 to 0/6
+-- which is the same statement as before in a regime 5x larger: its success was
+budget filling, and a sufficiency rule can only truncate a trustworthy ranking.
+
 ### Live 8-arm runs: the success claim does not survive replication
 
 Two live runs against `stealth/ox-alpha` over OpenRouter, six haystack tasks, one
@@ -544,6 +586,43 @@ means anything.
 A third caveat applies to both runs: the fixtures are cross-file by construction,
 which is the regime the graph is built for. Real single-file fixes, where lexical
 search suffices, are absent by selection.
+
+### The variance gate, run properly: five repetitions live
+
+`--repetitions 5` over four arms and six tasks, 120 live calls, one budget (4,000
+tokens), no voids. This is the run every earlier comparison needed:
+
+| arm | success by repetition | swing | output tokens | latency ms |
+| --- | --- | --- | --- | --- |
+| classic | 0.83 / 1.00 / 1.00 / 1.00 / 0.83 | 0.17 | 1508 +- 833 | 50,267 +- 27,132 |
+| graphrag | 0.83 / 1.00 / 1.00 / 1.00 / 1.00 | 0.17 | 1440 +- 684 | 49,259 +- 17,896 |
+| graph_only | 1.00 / 1.00 / 1.00 / 1.00 / 1.00 | 0.00 | 606 +- 394 | 25,975 +- 17,199 |
+| oracle | 1.00 / 0.83 / 0.83 / 1.00 / 0.83 | 0.17 | 467 +- 331 | 28,463 +- 23,712 |
+
+**Success remains uninterpretable at five repetitions.** Maximum within-arm swing is
+0.167 against a between-arm spread of 0.100 -- the noise is still larger than the
+effect, and five repetitions did not fix it because the problem is six tasks, not one
+run. Any future success claim on this fixture set needs more tasks, not more repeats.
+
+The continuous endpoints separate cleanly, and for the third independent time the
+effect belongs to `graph_only` rather than to the nominal treatment arm. Paired
+bootstrap over 30 instance-repetition pairs:
+
+| contrast | output tokens | latency | uncached input |
+| --- | --- | --- | --- |
+| graph_only - classic | **-902 [-1231, -574]** | **-24.3 s [-34.6, -14.1]** | **-76 [-89, -64]** |
+| oracle - classic | **-1041 [-1337, -764]** | **-21.8 s [-32.7, -11.0]** | **-3165 [-3197, -3133]** |
+| graphrag - classic | -68 [-399, +266] | -1.0 s [-11.9, +9.2] | **-89 [-104, -74]** |
+
+`graph_only` cuts output tokens 2.5x and latency 1.9x at the same context size; the
+only thing `graphrag` reliably reduces is uncached input, which was never the
+interesting claim. Weighted fusion buys nothing on the endpoints that reproduce.
+
+One result cuts against the design: **`oracle` had the lowest success of the four
+arms** (27/30, against `graph_only`'s 30/30). At 379 context tokens the gold-patch
+files alone are sometimes not enough to fix the task, so `oracle` is an information
+*floor*, not a success ceiling -- a ratio-to-oracle of 1.00 is not a proof of
+optimality.
 
 ### Pooled variance across the two live runs
 
@@ -667,6 +746,30 @@ not rescue it -- at `--stopping-patience 16` it still solves 1/6 while spending
 trustworthy, which is a stronger version of the same conclusion the fusion work
 reached. `oracle` and `full_file` are exempt by construction, since trimming
 either would change what the floor and ceiling mean.
+
+### The property that makes it an engineering artifact, not a tuning knob
+
+Swept over 256-8,000 tokens with the same arms and tasks, `--max-items 200`, with
+and without the rule. Cells are solved/attempted at mean context tokens:
+
+| budget | graph_only off | graph_only **on** | graph_escalate off | graph_escalate **on** | graphrag off | graphrag **on** |
+| --- | --- | --- | --- | --- | --- | --- |
+| 512 | 6/6 @489 | 6/6 @434 | 6/6 @494 | 6/6 @460 | 1/6 @492 | 1/6 @475 |
+| 1024 | 6/6 @1000 | 6/6 @634 | 6/6 @1002 | 6/6 @685 | 1/6 @1011 | 1/6 @1011 |
+| 2048 | 6/6 @2034 | 6/6 @853 | 6/6 @2005 | 6/6 @952 | 1/6 @2031 | 1/6 @1739 |
+| 4000 | 6/6 @3975 | 6/6 @853 | 6/6 @3978 | 6/6 @986 | 5/6 @3980 | 1/6 @1739 |
+| 8000 | 6/6 @5738 | 6/6 @853 | 6/6 @7356 | 6/6 @986 | 6/6 @7919 | 1/6 @1739 |
+
+**With the rule on, the graph arms' cost stops depending on the budget.** Off, they
+track it upward -- 2034 to 3975 to 5738 tokens for the same 6/6 -- because the tail
+is padding and the budget is the only thing stopping them. On, they saturate at 853
+and 986 tokens from 2,048 upward: a 6.7x and 7.5x reduction at the 8,000-token
+budget, at identical success. That is the property `graph_only` had by accident and
+every other arm lacked. The budget column stops being a description of what was
+sent and becomes a ceiling the arm declines to spend.
+
+`graphrag` saturates too, at 1,739 tokens -- and stays at 1/6. Its 6/6 at the
+8,000-token budget was 7,919 tokens of budget filling.
 
 Caveat: mock client, so this measures evidence survival per token, not model
 competence. The live stopping comparison has not been run.
@@ -873,24 +976,32 @@ So the honest revised claim is narrower and testable:
 
 What that requires, in order, with current status:
 
-1. **Variance first.** *Done, and it is the gate.* `evaluation/variance.py` reports
-   within-arm swing, within-task dispersion, and paired bootstrap intervals. Pooling
-   the two live runs gives a maximum within-arm success swing of 0.50 against a
-   between-arm spread of 0.42, so no success delta in this project is currently
-   interpretable. A live `--repetitions 5` run is in progress.
-2. **Switch the primary endpoint** to budget-at-100%-success. *Done in
-   `budget_sweep.py`*, which now prints a PRIMARY block with each arm's budget and
-   its ratio to the `oracle` floor and `full_file` ceiling, and refuses to let a
-   single-repetition table be read as a result. Measured on mock; not yet live.
+1. **Variance first.** *Done, and it settled the question against the success
+   endpoint.* `evaluation/variance.py` reports within-arm swing, within-task
+   dispersion, and paired bootstrap intervals. The live five-repetition run gives a
+   maximum within-arm swing of 0.167 against a between-arm spread of 0.100: success
+   is uninterpretable on this fixture set even with the repetitions, because the
+   binding constraint is six tasks. The continuous endpoints separate, and they
+   separate for `graph_only`, not for `graphrag`.
+2. **Switch the primary endpoint** to budget-at-100%-success. *Implemented in
+   `budget_sweep.py`*, which prints a PRIMARY block with each arm's budget and its
+   ratio to the `oracle` floor and `full_file` ceiling, refuses to let a
+   single-repetition table read as a result, and flags when a stopping rule has made
+   the budget column a ceiling rather than a description. Measured on mock in both
+   the 39k and 200k regimes; **the live sweep has not been run**, and one caveat now
+   attaches to the floor itself: `oracle` scored 27/30 live, so ratio-to-oracle is a
+   token-efficiency bound, not a proof of sufficiency.
 3. **Promote output tokens and latency to co-primary.** *Done*, and it relocated the
    effect: the reproducible ~2.8x belongs to `graph_only`, not to `graphrag`.
 4. **Replace weighted-sum fusion.** *Done, and one of the two candidates failed.*
    RRF made `graphrag` worse; conditional escalation reached 6/6 and is now the
    recommended mode. The weighted hybrids are demoted to ablation baselines.
-5. **Build an explicit sufficiency stopping rule.** *Done.* Reference closure, score
-   cliff, and flat-tail patience, off by default. It cuts the graph arms 4.7x at
-   unchanged success and collapses the lexically-fused arms, which is itself evidence
-   that their success came from budget filling rather than from ranking.
+5. **Build an explicit sufficiency stopping rule.** *Done, and it is the strongest
+   artifact here.* Reference closure, score cliff, and flat-tail patience, off by
+   default. It cuts the graph arms 4.7x at 39k and 10.4x at 200k at unchanged success,
+   makes their cost independent of the budget above ~2,048 tokens, and collapses the
+   lexically-fused arms in both regimes -- which is itself evidence that their success
+   came from budget filling rather than from ranking.
 6. **Replicate on real repositories** — SWE-bench Lite with test names withheld,
    stratified by gold-patch file count, pre-registered. *Not started.* This is the
    gate on external validity: if the graph arms' advantage comes from generated

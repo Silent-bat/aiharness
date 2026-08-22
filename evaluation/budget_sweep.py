@@ -25,6 +25,7 @@ import json
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Sequence
 
+from context_compiler.compiler import StoppingRule
 from context_compiler.providers import load_env_file
 
 from evaluation.task_benchmark import ARMS, DEFAULT_ARMS, benchmark
@@ -37,13 +38,15 @@ def sweep(tasks: Sequence[Mapping[str, Any]], budgets: Sequence[int], *,
           repetitions: int = 1, codex_cli: bool = False,
           input_rate: Optional[float] = None,
           output_rate: Optional[float] = None,
-          max_items: Optional[int] = None) -> Dict[str, Any]:
+          max_items: Optional[int] = None,
+          stopping: Optional[StoppingRule] = None) -> Dict[str, Any]:
     points: List[Dict[str, Any]] = []
     for budget in sorted(budgets):
         report = benchmark(tasks, mock=mock, token_budget=budget, max_tokens=None,
                            input_rate=input_rate, output_rate=output_rate,
                            repetitions=repetitions, codex_cli=codex_cli, arms=arms,
-                           force_token_budget=True, max_items=max_items)
+                           force_token_budget=True, max_items=max_items,
+                           stopping=stopping)
         if not report["token_budget_uniform"]:
             raise RuntimeError("budget was not uniform: {}".format(report["token_budgets_used"]))
         points.append({
@@ -55,6 +58,12 @@ def sweep(tasks: Sequence[Mapping[str, Any]], budgets: Sequence[int], *,
                     "success_rate": report[arm]["success_rate"],
                     "mean_context_tokens": round(report[arm]["mean_context_tokens"], 2),
                     "mean_context_items": round(report[arm]["mean_context_items"], 2),
+                    # With a stopping rule active the budget is a ceiling the arm
+                    # may decline to spend, so the budget alone no longer describes
+                    # what was sent. These say how much it declined and why.
+                    "mean_tokens_left_unused": round(
+                        report[arm].get("mean_tokens_left_unused") or 0.0, 2),
+                    "stop_reasons": report[arm].get("stop_reasons") or {},
                     # Co-primary endpoints. These reproduced across two live runs
                     # at a separation success never achieved, so they are carried
                     # at every sweep point rather than reported once at the end.
@@ -72,6 +81,13 @@ def sweep(tasks: Sequence[Mapping[str, Any]], budgets: Sequence[int], *,
     return {"budgets": sorted(budgets), "arms": list(arms), "points": points,
             "max_items": max_items,
             "repetitions": repetitions,
+            # A manipulated variable, recorded so a stopping-on table can never be
+            # mistaken for a stopping-off one.
+            "stopping_rule": (None if stopping is None or not stopping.enabled
+                              else {"cliff_ratio": stopping.cliff_ratio,
+                                    "patience": stopping.patience,
+                                    "min_items": stopping.min_items,
+                                    "require_closure": stopping.require_closure}),
             "tokens_to_reach": reach,
             # The headline. Success at a fixed budget is a precondition here, not
             # a contrast: it is reported only so a reader can see that an arm
@@ -199,6 +215,13 @@ def render_table(result: Mapping[str, Any]) -> str:
         lines.append("{:>7} ".format(point["token_budget"])
                      + " ".join("{:>15}".format(cell) for cell in cells))
 
+    rule = result.get("stopping_rule")
+    if rule:
+        lines.append("")
+        lines.append("STOPPING RULE ACTIVE (cliff {cliff_ratio}, patience {patience}, "
+                     "min items {min_items}, closure {require_closure}): the budget "
+                     "column is a ceiling, not what was sent.".format(**rule))
+
     primary = result.get("primary_endpoint") or {}
     if primary:
         lines.append("")
@@ -265,6 +288,9 @@ def main() -> int:
     parser.add_argument("--max-items", type=int,
                         help="uniform context item cap; raise it on large repositories "
                              "so the token budget is what binds")
+    parser.add_argument("--stopping", action="store_true",
+                        help="stop packing at sufficiency rather than at the budget; this "
+                             "changes what every arm sends, so pair it with a run without it")
     parser.add_argument("--output", type=Path)
     parser.add_argument("--env-file", default=".env",
                         help="KEY=value file to load credentials from for live runs")
@@ -282,7 +308,8 @@ def main() -> int:
     tasks = json.loads(args.tasks.read_text(encoding="utf-8"))
     result = sweep(tasks, args.budgets, arms=args.arms, mock=args.mock,
                    repetitions=max(1, args.repetitions), codex_cli=args.codex_cli,
-                   max_items=args.max_items)
+                   max_items=args.max_items,
+                   stopping=StoppingRule() if args.stopping else None)
     rendered = json.dumps(result, indent=2, sort_keys=True)
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)

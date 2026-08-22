@@ -1,0 +1,665 @@
+{
+  "arms": [
+    "classic",
+    "graphrag",
+    "graph_escalate",
+    "graph_only",
+    "oracle"
+  ],
+  "budgets": [
+    256,
+    512,
+    1024,
+    2048,
+    4000,
+    8000
+  ],
+  "co_primary_endpoints": {
+    "arms": {
+      "classic": {
+        "latency_ms_sd": 57.6173,
+        "mean_latency_ms": 290.57,
+        "mean_output_tokens": 32.83,
+        "output_tokens_sd": 28.9856,
+        "success_rate": 0.16666666666666666
+      },
+      "graph_escalate": {
+        "latency_ms_sd": 61.6915,
+        "mean_latency_ms": 259.89,
+        "mean_output_tokens": 76.0,
+        "output_tokens_sd": 25.2428,
+        "success_rate": 1.0
+      },
+      "graph_only": {
+        "latency_ms_sd": 9.7525,
+        "mean_latency_ms": 229.77,
+        "mean_output_tokens": 76.0,
+        "output_tokens_sd": 25.2428,
+        "success_rate": 1.0
+      },
+      "graphrag": {
+        "latency_ms_sd": 60.4848,
+        "mean_latency_ms": 287.55,
+        "mean_output_tokens": 76.0,
+        "output_tokens_sd": 25.2428,
+        "success_rate": 1.0
+      },
+      "oracle": {
+        "latency_ms_sd": 31.1922,
+        "mean_latency_ms": 237.16,
+        "mean_output_tokens": 76.0,
+        "output_tokens_sd": 25.2428,
+        "success_rate": 1.0
+      }
+    },
+    "measured_at_token_budget": 8000,
+    "note": "output tokens track context precision and reproduced across two live runs; success at this budget did not"
+  },
+  "max_items": 200,
+  "note": "mock runs measure whether required evidence survives the budget, not model competence",
+  "points": [
+    {
+      "arms": {
+        "classic": {
+          "attempts": 6,
+          "latency_ms_sd": 34.5522,
+          "mean_context_items": 2.0,
+          "mean_context_tokens": 232.5,
+          "mean_latency_ms": 261.59,
+          "mean_output_tokens": 21.0,
+          "mean_tokens_left_unused": 23.0,
+          "output_tokens_sd": 0.0,
+          "stop_reasons": {
+            "candidates_exhausted": 3,
+            "token_budget": 3
+          },
+          "success_rate": 0.0,
+          "success_rate_swing": null,
+          "successes": 0
+        },
+        "graph_escalate": {
+          "attempts": 6,
+          "latency_ms_sd": 34.8579,
+          "mean_context_items": 1.0,
+          "mean_context_tokens": 188.5,
+          "mean_latency_ms": 262.14,
+          "mean_output_tokens": 21.0,
+          "mean_tokens_left_unused": 67.5,
+          "output_tokens_sd": 0.0,
+          "stop_reasons": {
+            "candidates_exhausted": 6
+          },
+          "success_rate": 0.0,
+          "success_rate_swing": null,
+          "successes": 0
+        },
+        "graph_only": {
+          "attempts": 6,
+          "latency_ms_sd": 82.4895,
+          "mean_context_items": 1.83,
+          "mean_context_tokens": 244.5,
+          "mean_latency_ms": 300.78,
+          "mean_output_tokens": 46.17,
+          "mean_tokens_left_unused": 11.33,
+          "output_tokens_sd": 32.264,
+          "stop_reasons": {
+            "candidates_exhausted": 1,
+            "token_budget": 5
+          },
+          "success_rate": 0.5,
+          "success_rate_swing": null,
+          "successes": 3
+        },
+        "graphrag": {
+          "attempts": 6,
+          "latency_ms_sd": 33.4795,
+          "mean_context_items": 2.0,
+          "mean_context_tokens": 247.83,
+          "mean_latency_ms": 262.17,
+          "mean_output_tokens": 21.0,
+          "mean_tokens_left_unused": 8.0,
+          "output_tokens_sd": 0.0,
+          "stop_reasons": {
+            "token_budget": 6
+          },
+          "success_rate": 0.0,
+          "success_rate_swing": null,
+          "successes": 0
+        },
+        "oracle": {
+          "attempts": 6,
+          "latency_ms_sd": 33.8939,
+          "mean_context_items": 2.0,
+          "mean_context_tokens": 223.5,
+          "mean_latency_ms": 241.55,
+          "mean_output_tokens": 62.5,
+          "mean_tokens_left_unused": 32.0,
+          "output_tokens_sd": 29.8044,
+          "stop_reasons": {
+            "candidates_exhausted": 4,
+            "token_budget": 2
+          },
+          "success_rate": 0.8333333333333334,
+          "success_rate_swing": null,
+          "successes": 5
+        }
+      },
+      "token_budget": 256,
+      "variance": null
+    },
+    {
+      "arms": {
+        "classic": {
+          "attempts": 6,
+          "latency_ms_sd": 51.8295,
+          "mean_context_items": 4.5,
+          "mean_context_tokens": 498.5,
+          "mean_latency_ms": 258.75,
+          "mean_output_tokens": 21.0,
+          "mean_tokens_left_unused": 13.0,
+          "output_tokens_sd": 0.0,
+          "stop_reasons": {
+            "candidates_exhausted": 2,
+            "token_budget": 4
+          },
+          "success_rate": 0.0,
+          "success_rate_swing": null,
+          "successes": 0
+        },
+        "graph_escalate": {
+          "attempts": 6,
+          "latency_ms_sd": 65.2981,
+          "mean_context_items": 3.67,
+          "mean_context_tokens": 493.83,
+          "mean_latency_ms": 267.43,
+          "mean_output_tokens": 76.0,
+          "mean_tokens_left_unused": 18.0,
+          "output_tokens_sd": 25.2428,
+          "stop_reasons": {
+            "candidates_exhausted": 1,
+            "token_budget": 5
+          },
+          "success_rate": 1.0,
+          "success_rate_swing": null,
+          "successes": 6
+        },
+        "graph_only": {
+          "attempts": 6,
+          "latency_ms_sd": 59.0306,
+          "mean_context_items": 4.0,
+          "mean_context_tokens": 489.0,
+          "mean_latency_ms": 267.25,
+          "mean_output_tokens": 76.0,
+          "mean_tokens_left_unused": 22.67,
+          "output_tokens_sd": 25.2428,
+          "stop_reasons": {
+            "candidates_exhausted": 3,
+            "token_budget": 3
+          },
+          "success_rate": 1.0,
+          "success_rate_swing": null,
+          "successes": 6
+        },
+        "graphrag": {
+          "attempts": 6,
+          "latency_ms_sd": 265.8303,
+          "mean_context_items": 4.17,
+          "mean_context_tokens": 491.67,
+          "mean_latency_ms": 379.49,
+          "mean_output_tokens": 32.83,
+          "mean_tokens_left_unused": 20.5,
+          "output_tokens_sd": 28.9856,
+          "stop_reasons": {
+            "candidates_exhausted": 2,
+            "token_budget": 4
+          },
+          "success_rate": 0.16666666666666666,
+          "success_rate_swing": null,
+          "successes": 1
+        },
+        "oracle": {
+          "attempts": 6,
+          "latency_ms_sd": 49.3263,
+          "mean_context_items": 3.0,
+          "mean_context_tokens": 379.0,
+          "mean_latency_ms": 248.44,
+          "mean_output_tokens": 76.0,
+          "mean_tokens_left_unused": 132.83,
+          "output_tokens_sd": 25.2428,
+          "stop_reasons": {
+            "candidates_exhausted": 6
+          },
+          "success_rate": 1.0,
+          "success_rate_swing": null,
+          "successes": 6
+        }
+      },
+      "token_budget": 512,
+      "variance": null
+    },
+    {
+      "arms": {
+        "classic": {
+          "attempts": 6,
+          "latency_ms_sd": 12.0715,
+          "mean_context_items": 8.17,
+          "mean_context_tokens": 994.5,
+          "mean_latency_ms": 228.2,
+          "mean_output_tokens": 21.0,
+          "mean_tokens_left_unused": 28.83,
+          "output_tokens_sd": 0.0,
+          "stop_reasons": {
+            "candidates_exhausted": 5,
+            "token_budget": 1
+          },
+          "success_rate": 0.0,
+          "success_rate_swing": null,
+          "successes": 0
+        },
+        "graph_escalate": {
+          "attempts": 6,
+          "latency_ms_sd": 12.6028,
+          "mean_context_items": 6.83,
+          "mean_context_tokens": 1002.5,
+          "mean_latency_ms": 225.51,
+          "mean_output_tokens": 76.0,
+          "mean_tokens_left_unused": 21.17,
+          "output_tokens_sd": 25.2428,
+          "stop_reasons": {
+            "candidates_exhausted": 2,
+            "token_budget": 4
+          },
+          "success_rate": 1.0,
+          "success_rate_swing": null,
+          "successes": 6
+        },
+        "graph_only": {
+          "attempts": 6,
+          "latency_ms_sd": 35.1769,
+          "mean_context_items": 8.0,
+          "mean_context_tokens": 999.67,
+          "mean_latency_ms": 239.41,
+          "mean_output_tokens": 76.0,
+          "mean_tokens_left_unused": 24.5,
+          "output_tokens_sd": 25.2428,
+          "stop_reasons": {
+            "candidates_exhausted": 2,
+            "token_budget": 4
+          },
+          "success_rate": 1.0,
+          "success_rate_swing": null,
+          "successes": 6
+        },
+        "graphrag": {
+          "attempts": 6,
+          "latency_ms_sd": 9.6568,
+          "mean_context_items": 8.0,
+          "mean_context_tokens": 1011.17,
+          "mean_latency_ms": 230.9,
+          "mean_output_tokens": 32.83,
+          "mean_tokens_left_unused": 13.33,
+          "output_tokens_sd": 28.9856,
+          "stop_reasons": {
+            "candidates_exhausted": 1,
+            "token_budget": 5
+          },
+          "success_rate": 0.16666666666666666,
+          "success_rate_swing": null,
+          "successes": 1
+        },
+        "oracle": {
+          "attempts": 6,
+          "latency_ms_sd": 5.9728,
+          "mean_context_items": 3.0,
+          "mean_context_tokens": 379.33,
+          "mean_latency_ms": 206.5,
+          "mean_output_tokens": 76.0,
+          "mean_tokens_left_unused": 644.5,
+          "output_tokens_sd": 25.2428,
+          "stop_reasons": {
+            "candidates_exhausted": 6
+          },
+          "success_rate": 1.0,
+          "success_rate_swing": null,
+          "successes": 6
+        }
+      },
+      "token_budget": 1024,
+      "variance": null
+    },
+    {
+      "arms": {
+        "classic": {
+          "attempts": 6,
+          "latency_ms_sd": 50.0381,
+          "mean_context_items": 22.83,
+          "mean_context_tokens": 2015.5,
+          "mean_latency_ms": 253.41,
+          "mean_output_tokens": 21.0,
+          "mean_tokens_left_unused": 31.67,
+          "output_tokens_sd": 0.0,
+          "stop_reasons": {
+            "candidates_exhausted": 4,
+            "token_budget": 2
+          },
+          "success_rate": 0.0,
+          "success_rate_swing": null,
+          "successes": 0
+        },
+        "graph_escalate": {
+          "attempts": 6,
+          "latency_ms_sd": 15.498,
+          "mean_context_items": 15.0,
+          "mean_context_tokens": 2005.17,
+          "mean_latency_ms": 237.06,
+          "mean_output_tokens": 76.0,
+          "mean_tokens_left_unused": 42.17,
+          "output_tokens_sd": 25.2428,
+          "stop_reasons": {
+            "candidates_exhausted": 3,
+            "token_budget": 3
+          },
+          "success_rate": 1.0,
+          "success_rate_swing": null,
+          "successes": 6
+        },
+        "graph_only": {
+          "attempts": 6,
+          "latency_ms_sd": 17.253,
+          "mean_context_items": 20.0,
+          "mean_context_tokens": 2034.33,
+          "mean_latency_ms": 249.08,
+          "mean_output_tokens": 76.0,
+          "mean_tokens_left_unused": 13.83,
+          "output_tokens_sd": 25.2428,
+          "stop_reasons": {
+            "candidates_exhausted": 1,
+            "token_budget": 5
+          },
+          "success_rate": 1.0,
+          "success_rate_swing": null,
+          "successes": 6
+        },
+        "graphrag": {
+          "attempts": 6,
+          "latency_ms_sd": 23.2987,
+          "mean_context_items": 19.5,
+          "mean_context_tokens": 2030.83,
+          "mean_latency_ms": 249.14,
+          "mean_output_tokens": 32.83,
+          "mean_tokens_left_unused": 18.0,
+          "output_tokens_sd": 28.9856,
+          "stop_reasons": {
+            "candidates_exhausted": 2,
+            "token_budget": 4
+          },
+          "success_rate": 0.16666666666666666,
+          "success_rate_swing": null,
+          "successes": 1
+        },
+        "oracle": {
+          "attempts": 6,
+          "latency_ms_sd": 426.6569,
+          "mean_context_items": 3.0,
+          "mean_context_tokens": 379.33,
+          "mean_latency_ms": 406.75,
+          "mean_output_tokens": 76.0,
+          "mean_tokens_left_unused": 1668.5,
+          "output_tokens_sd": 25.2428,
+          "stop_reasons": {
+            "candidates_exhausted": 6
+          },
+          "success_rate": 1.0,
+          "success_rate_swing": null,
+          "successes": 6
+        }
+      },
+      "token_budget": 2048,
+      "variance": null
+    },
+    {
+      "arms": {
+        "classic": {
+          "attempts": 6,
+          "latency_ms_sd": 595.1295,
+          "mean_context_items": 53.67,
+          "mean_context_tokens": 3973.67,
+          "mean_latency_ms": 499.17,
+          "mean_output_tokens": 32.83,
+          "mean_tokens_left_unused": 25.0,
+          "output_tokens_sd": 28.9856,
+          "stop_reasons": {
+            "candidates_exhausted": 3,
+            "token_budget": 3
+          },
+          "success_rate": 0.16666666666666666,
+          "success_rate_swing": null,
+          "successes": 1
+        },
+        "graph_escalate": {
+          "attempts": 6,
+          "latency_ms_sd": 143.0709,
+          "mean_context_items": 34.5,
+          "mean_context_tokens": 3977.83,
+          "mean_latency_ms": 291.04,
+          "mean_output_tokens": 76.0,
+          "mean_tokens_left_unused": 21.33,
+          "output_tokens_sd": 25.2428,
+          "stop_reasons": {
+            "candidates_exhausted": 3,
+            "token_budget": 3
+          },
+          "success_rate": 1.0,
+          "success_rate_swing": null,
+          "successes": 6
+        },
+        "graph_only": {
+          "attempts": 6,
+          "latency_ms_sd": 150.3127,
+          "mean_context_items": 45.33,
+          "mean_context_tokens": 3975.17,
+          "mean_latency_ms": 316.49,
+          "mean_output_tokens": 76.0,
+          "mean_tokens_left_unused": 24.83,
+          "output_tokens_sd": 25.2428,
+          "stop_reasons": {
+            "candidates_exhausted": 2,
+            "token_budget": 4
+          },
+          "success_rate": 1.0,
+          "success_rate_swing": null,
+          "successes": 6
+        },
+        "graphrag": {
+          "attempts": 6,
+          "latency_ms_sd": 311.1095,
+          "mean_context_items": 45.0,
+          "mean_context_tokens": 3980.33,
+          "mean_latency_ms": 393.28,
+          "mean_output_tokens": 62.5,
+          "mean_tokens_left_unused": 20.83,
+          "output_tokens_sd": 29.8044,
+          "stop_reasons": {
+            "candidates_exhausted": 3,
+            "token_budget": 3
+          },
+          "success_rate": 0.8333333333333334,
+          "success_rate_swing": null,
+          "successes": 5
+        },
+        "oracle": {
+          "attempts": 6,
+          "latency_ms_sd": 25.8381,
+          "mean_context_items": 3.0,
+          "mean_context_tokens": 379.33,
+          "mean_latency_ms": 217.07,
+          "mean_output_tokens": 76.0,
+          "mean_tokens_left_unused": 3620.5,
+          "output_tokens_sd": 25.2428,
+          "stop_reasons": {
+            "candidates_exhausted": 6
+          },
+          "success_rate": 1.0,
+          "success_rate_swing": null,
+          "successes": 6
+        }
+      },
+      "token_budget": 4000,
+      "variance": null
+    },
+    {
+      "arms": {
+        "classic": {
+          "attempts": 6,
+          "latency_ms_sd": 57.6173,
+          "mean_context_items": 104.67,
+          "mean_context_tokens": 7150.5,
+          "mean_latency_ms": 290.57,
+          "mean_output_tokens": 32.83,
+          "mean_tokens_left_unused": 844.67,
+          "output_tokens_sd": 28.9856,
+          "stop_reasons": {
+            "candidates_exhausted": 2,
+            "token_budget": 4
+          },
+          "success_rate": 0.16666666666666666,
+          "success_rate_swing": null,
+          "successes": 1
+        },
+        "graph_escalate": {
+          "attempts": 6,
+          "latency_ms_sd": 61.6915,
+          "mean_context_items": 65.67,
+          "mean_context_tokens": 7356.17,
+          "mean_latency_ms": 259.89,
+          "mean_output_tokens": 76.0,
+          "mean_tokens_left_unused": 644.33,
+          "output_tokens_sd": 25.2428,
+          "stop_reasons": {
+            "candidates_exhausted": 6
+          },
+          "success_rate": 1.0,
+          "success_rate_swing": null,
+          "successes": 6
+        },
+        "graph_only": {
+          "attempts": 6,
+          "latency_ms_sd": 9.7525,
+          "mean_context_items": 66.67,
+          "mean_context_tokens": 5738.33,
+          "mean_latency_ms": 229.77,
+          "mean_output_tokens": 76.0,
+          "mean_tokens_left_unused": 2260.33,
+          "output_tokens_sd": 25.2428,
+          "stop_reasons": {
+            "candidates_exhausted": 6
+          },
+          "success_rate": 1.0,
+          "success_rate_swing": null,
+          "successes": 6
+        },
+        "graphrag": {
+          "attempts": 6,
+          "latency_ms_sd": 60.4848,
+          "mean_context_items": 102.5,
+          "mean_context_tokens": 7919.33,
+          "mean_latency_ms": 287.55,
+          "mean_output_tokens": 76.0,
+          "mean_tokens_left_unused": 79.5,
+          "output_tokens_sd": 25.2428,
+          "stop_reasons": {
+            "candidates_exhausted": 3,
+            "token_budget": 3
+          },
+          "success_rate": 1.0,
+          "success_rate_swing": null,
+          "successes": 6
+        },
+        "oracle": {
+          "attempts": 6,
+          "latency_ms_sd": 31.1922,
+          "mean_context_items": 3.0,
+          "mean_context_tokens": 379.33,
+          "mean_latency_ms": 237.16,
+          "mean_output_tokens": 76.0,
+          "mean_tokens_left_unused": 7620.5,
+          "output_tokens_sd": 25.2428,
+          "stop_reasons": {
+            "candidates_exhausted": 6
+          },
+          "success_rate": 1.0,
+          "success_rate_swing": null,
+          "successes": 6
+        }
+      },
+      "token_budget": 8000,
+      "variance": null
+    }
+  ],
+  "primary_endpoint": {
+    "arms": {
+      "classic": {
+        "budget_to_reach_target": null,
+        "ratio_to_full_file_ceiling": null,
+        "ratio_to_oracle_floor": null,
+        "reached_target": false
+      },
+      "graph_escalate": {
+        "budget_to_reach_target": 512,
+        "ratio_to_full_file_ceiling": null,
+        "ratio_to_oracle_floor": 1.0,
+        "reached_target": true
+      },
+      "graph_only": {
+        "budget_to_reach_target": 512,
+        "ratio_to_full_file_ceiling": null,
+        "ratio_to_oracle_floor": 1.0,
+        "reached_target": true
+      },
+      "graphrag": {
+        "budget_to_reach_target": 8000,
+        "ratio_to_full_file_ceiling": null,
+        "ratio_to_oracle_floor": 15.62,
+        "reached_target": true
+      },
+      "oracle": {
+        "budget_to_reach_target": 512,
+        "ratio_to_full_file_ceiling": null,
+        "ratio_to_oracle_floor": 1.0,
+        "reached_target": true
+      }
+    },
+    "ceiling_arm": null,
+    "floor_arm": "oracle",
+    "metric": "smallest swept token budget at which the arm reaches the target",
+    "note": "success rate is a precondition, not the contrast: an arm that never reaches the target has no budget to compare, and one that does is compared on tokens, not on wins",
+    "target_success_rate": 1.0,
+    "unreached_arms": [
+      "classic"
+    ]
+  },
+  "repetitions": 1,
+  "stopping_rule": null,
+  "tokens_to_reach": {
+    "classic": {
+      "budget_for_success_rate_0.5": null,
+      "budget_for_success_rate_1": null
+    },
+    "graph_escalate": {
+      "budget_for_success_rate_0.5": 512,
+      "budget_for_success_rate_1": 512
+    },
+    "graph_only": {
+      "budget_for_success_rate_0.5": 256,
+      "budget_for_success_rate_1": 512
+    },
+    "graphrag": {
+      "budget_for_success_rate_0.5": 4000,
+      "budget_for_success_rate_1": 8000
+    },
+    "oracle": {
+      "budget_for_success_rate_0.5": 256,
+      "budget_for_success_rate_1": 512
+    }
+  }
+}
