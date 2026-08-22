@@ -1,0 +1,1149 @@
+{
+  "arms": [
+    "classic",
+    "graphrag",
+    "graph_only",
+    "graph_escalate"
+  ],
+  "cache_bust": true,
+  "classic": {
+    "attempts": 6,
+    "graded_attempts": 6,
+    "label": "lexical BM25 only (classic CLI)",
+    "mean_context_items": 27.333333333333332,
+    "mean_context_tokens": 2303.0,
+    "mean_latency_ms": 307.81016666666665,
+    "mean_open_references": 2.0,
+    "mean_tokens_left_unused": 1695.5,
+    "retrieval_mode": "lexical",
+    "stop_reasons": {
+      "no_new_information": 6
+    },
+    "success_rate": 0.0,
+    "success_rate_ci95": [
+      0.0,
+      0.390334
+    ],
+    "success_rate_graded": 0.0,
+    "success_rate_graded_ci95": [
+      0.0,
+      0.390334
+    ],
+    "successes": 0,
+    "total_cache_read_tokens": 0,
+    "total_cost_usd": 0,
+    "total_input_tokens": 14721,
+    "total_output_tokens": 126,
+    "voids": 0
+  },
+  "comparison": {
+    "baseline_arm": "classic",
+    "comparable_pairs": 6,
+    "pairs_dropped_void": 0,
+    "treatment_arm": "graphrag"
+  },
+  "graph_escalate": {
+    "attempts": 6,
+    "graded_attempts": 6,
+    "label": "graph first, lexical only on an empty frontier",
+    "mean_context_items": 13.833333333333334,
+    "mean_context_tokens": 1678.0,
+    "mean_latency_ms": 290.2806666666666,
+    "mean_open_references": 0.6666666666666666,
+    "mean_tokens_left_unused": 2321.5,
+    "retrieval_mode": "graph_escalate",
+    "stop_reasons": {
+      "closure": 4,
+      "score_cliff": 1,
+      "token_budget": 1
+    },
+    "success_rate": 1.0,
+    "success_rate_ci95": [
+      0.609666,
+      1.0
+    ],
+    "success_rate_graded": 1.0,
+    "success_rate_graded_ci95": [
+      0.609666,
+      1.0
+    ],
+    "successes": 6,
+    "total_cache_read_tokens": 0,
+    "total_cost_usd": 0,
+    "total_input_tokens": 10972,
+    "total_output_tokens": 456,
+    "voids": 0
+  },
+  "graph_only": {
+    "attempts": 6,
+    "graded_attempts": 6,
+    "label": "graph traversal only",
+    "mean_context_items": 17.166666666666668,
+    "mean_context_tokens": 1622.8333333333333,
+    "mean_latency_ms": 283.6885,
+    "mean_open_references": 1.1666666666666667,
+    "mean_tokens_left_unused": 2376.8333333333335,
+    "retrieval_mode": "graph",
+    "stop_reasons": {
+      "closure": 4,
+      "score_cliff": 2
+    },
+    "success_rate": 1.0,
+    "success_rate_ci95": [
+      0.609666,
+      1.0
+    ],
+    "success_rate_graded": 1.0,
+    "success_rate_graded_ci95": [
+      0.609666,
+      1.0
+    ],
+    "successes": 6,
+    "total_cache_read_tokens": 0,
+    "total_cost_usd": 0,
+    "total_input_tokens": 10638,
+    "total_output_tokens": 456,
+    "voids": 0
+  },
+  "graphrag": {
+    "attempts": 6,
+    "graded_attempts": 6,
+    "label": "lexical + graph (GraphRAG CLI)",
+    "mean_context_items": 28.333333333333332,
+    "mean_context_tokens": 2700.8333333333335,
+    "mean_latency_ms": 295.4746666666667,
+    "mean_open_references": 1.8333333333333333,
+    "mean_tokens_left_unused": 1300.3333333333333,
+    "retrieval_mode": "lexical_graph",
+    "stop_reasons": {
+      "no_new_information": 6
+    },
+    "success_rate": 0.16666666666666666,
+    "success_rate_ci95": [
+      0.030053,
+      0.563503
+    ],
+    "success_rate_graded": 0.16666666666666666,
+    "success_rate_graded_ci95": [
+      0.030053,
+      0.563503
+    ],
+    "successes": 1,
+    "total_cache_read_tokens": 0,
+    "total_cost_usd": 0,
+    "total_input_tokens": 17107,
+    "total_output_tokens": 197,
+    "voids": 0
+  },
+  "marginal_graph_contribution": {
+    "classic_to_graphrag": {
+      "mean_context_token_delta": 397.833,
+      "success_rate_delta": 0.166667,
+      "total_input_token_delta": 2386
+    }
+  },
+  "max_items": 200,
+  "max_items_uniform": true,
+  "paired_deltas": [
+    {
+      "context_token_delta_treatment_minus_baseline": 372,
+      "input_token_delta_treatment_minus_baseline": 371,
+      "latency_ms_delta_treatment_minus_baseline": 26.015,
+      "repetition": 1,
+      "success_delta_treatment_minus_baseline": 0,
+      "task_id": "debug-currency-rounding"
+    },
+    {
+      "context_token_delta_treatment_minus_baseline": 326,
+      "input_token_delta_treatment_minus_baseline": 326,
+      "latency_ms_delta_treatment_minus_baseline": -70.086,
+      "repetition": 1,
+      "success_delta_treatment_minus_baseline": 0,
+      "task_id": "debug-empty-cart"
+    },
+    {
+      "context_token_delta_treatment_minus_baseline": 470,
+      "input_token_delta_treatment_minus_baseline": 470,
+      "latency_ms_delta_treatment_minus_baseline": -18.888,
+      "repetition": 1,
+      "success_delta_treatment_minus_baseline": 1,
+      "task_id": "debug-malformed-payload"
+    },
+    {
+      "context_token_delta_treatment_minus_baseline": 418,
+      "input_token_delta_treatment_minus_baseline": 418,
+      "latency_ms_delta_treatment_minus_baseline": 16.911,
+      "repetition": 1,
+      "success_delta_treatment_minus_baseline": 0,
+      "task_id": "debug-retry-boundary"
+    },
+    {
+      "context_token_delta_treatment_minus_baseline": 393,
+      "input_token_delta_treatment_minus_baseline": 393,
+      "latency_ms_delta_treatment_minus_baseline": 28.941,
+      "repetition": 1,
+      "success_delta_treatment_minus_baseline": 0,
+      "task_id": "debug-unicode-slug"
+    },
+    {
+      "context_token_delta_treatment_minus_baseline": 408,
+      "input_token_delta_treatment_minus_baseline": 408,
+      "latency_ms_delta_treatment_minus_baseline": -56.906,
+      "repetition": 1,
+      "success_delta_treatment_minus_baseline": 0,
+      "task_id": "security-authorization-scope"
+    }
+  ],
+  "paired_exact_test": {
+    "classic_only_wins": 0,
+    "discordant_pairs": 1,
+    "graphrag_only_wins": 1,
+    "two_sided_exact_p_value": 1.0
+  },
+  "results": [
+    {
+      "arm": "classic",
+      "cache_read_tokens": null,
+      "cache_write_tokens": null,
+      "changed_files": 0,
+      "context_items": 26,
+      "context_tokens": 2161,
+      "error": "test_empty_cart_is_rejected (test_checkout.CheckoutTest) ... FAIL\n\n======================================================================\nFAIL: test_empty_cart_is_rejected (test_checkout.CheckoutTest)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/private/var/folders/8x/0tsp261502d33cyc69x4pj200000gn/T/graph-context-lwtnge8u/haystack_empty_cart_bug/tests/test_checkout.py\", line 10, in test_empty_cart_is_rejected\n    submit_order([], PaymentGateway())\nAssertionError: ValueError not raised\n\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nFAILED (failures=1)",
+      "estimated_cost_usd": null,
+      "input_tokens": 2304,
+      "latency_ms": 398.01,
+      "model": "mock",
+      "open_references": 4,
+      "output_tokens": 21,
+      "repetition": 1,
+      "retrieval_mode": "lexical",
+      "stop_reason": "no_new_information",
+      "success": false,
+      "task_id": "debug-empty-cart",
+      "test_exit_code": 1,
+      "token_budget": 4000,
+      "tokens_left_unused": 1839,
+      "total_prompt_tokens": 2304,
+      "void": false
+    },
+    {
+      "arm": "graphrag",
+      "cache_read_tokens": null,
+      "cache_write_tokens": null,
+      "changed_files": 0,
+      "context_items": 26,
+      "context_tokens": 2487,
+      "error": "test_empty_cart_is_rejected (test_checkout.CheckoutTest) ... FAIL\n\n======================================================================\nFAIL: test_empty_cart_is_rejected (test_checkout.CheckoutTest)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/private/var/folders/8x/0tsp261502d33cyc69x4pj200000gn/T/graph-context-r09q6p40/haystack_empty_cart_bug/tests/test_checkout.py\", line 10, in test_empty_cart_is_rejected\n    submit_order([], PaymentGateway())\nAssertionError: ValueError not raised\n\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nFAILED (failures=1)",
+      "estimated_cost_usd": null,
+      "input_tokens": 2630,
+      "latency_ms": 327.924,
+      "model": "mock",
+      "open_references": 4,
+      "output_tokens": 21,
+      "repetition": 1,
+      "retrieval_mode": "lexical_graph",
+      "stop_reason": "no_new_information",
+      "success": false,
+      "task_id": "debug-empty-cart",
+      "test_exit_code": 1,
+      "token_budget": 4000,
+      "tokens_left_unused": 1515,
+      "total_prompt_tokens": 2630,
+      "void": false
+    },
+    {
+      "arm": "graph_only",
+      "cache_read_tokens": null,
+      "cache_write_tokens": null,
+      "changed_files": 1,
+      "context_items": 6,
+      "context_tokens": 683,
+      "error": null,
+      "estimated_cost_usd": null,
+      "input_tokens": 826,
+      "latency_ms": 321.423,
+      "model": "mock",
+      "open_references": 0,
+      "output_tokens": 102,
+      "repetition": 1,
+      "retrieval_mode": "graph",
+      "stop_reason": "closure",
+      "success": true,
+      "task_id": "debug-empty-cart",
+      "test_exit_code": 0,
+      "token_budget": 4000,
+      "tokens_left_unused": 3317,
+      "total_prompt_tokens": 826,
+      "void": false
+    },
+    {
+      "arm": "graph_escalate",
+      "cache_read_tokens": null,
+      "cache_write_tokens": null,
+      "changed_files": 1,
+      "context_items": 6,
+      "context_tokens": 802,
+      "error": null,
+      "estimated_cost_usd": null,
+      "input_tokens": 946,
+      "latency_ms": 291.35,
+      "model": "mock",
+      "open_references": 0,
+      "output_tokens": 102,
+      "repetition": 1,
+      "retrieval_mode": "graph_escalate",
+      "stop_reason": "closure",
+      "success": true,
+      "task_id": "debug-empty-cart",
+      "test_exit_code": 0,
+      "token_budget": 4000,
+      "tokens_left_unused": 3198,
+      "total_prompt_tokens": 946,
+      "void": false
+    },
+    {
+      "arm": "classic",
+      "cache_read_tokens": null,
+      "cache_write_tokens": null,
+      "changed_files": 0,
+      "context_items": 29,
+      "context_tokens": 2461,
+      "error": "test_malformed_input_is_rejected (test_api.ApiTest) ... ERROR\n\n======================================================================\nERROR: test_malformed_input_is_rejected (test_api.ApiTest)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/private/var/folders/8x/0tsp261502d33cyc69x4pj200000gn/T/graph-context-72ii7urc/haystack_malformed_payload_bug/tests/test_api.py\", line 9, in test_malformed_input_is_rejected\n    process_request(\"not-a-mapping\")\n  File \"/private/var/folders/8x/0tsp261502d33cyc69x4pj200000gn/T/graph-context-72ii7urc/haystack_malformed_payload_bug/api.py\", line 5, in process_request\n    return sanitize_payload(payload)\n  File \"/private/var/folders/8x/0tsp261502d33cyc69x4pj200000gn/T/graph-context-72ii7urc/haystack_malformed_payload_bug/validation.py\", line 2, in sanitize_payload\n    return {key: value.strip() for key, value in payload.items()}\nAttributeError: 'str' object has no attribute 'items'\n\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nFAILED (errors=1)",
+      "estimated_cost_usd": null,
+      "input_tokens": 2615,
+      "latency_ms": 293.722,
+      "model": "mock",
+      "open_references": 3,
+      "output_tokens": 21,
+      "repetition": 1,
+      "retrieval_mode": "lexical",
+      "stop_reason": "no_new_information",
+      "success": false,
+      "task_id": "debug-malformed-payload",
+      "test_exit_code": 1,
+      "token_budget": 4000,
+      "tokens_left_unused": 1540,
+      "total_prompt_tokens": 2615,
+      "void": false
+    },
+    {
+      "arm": "graphrag",
+      "cache_read_tokens": null,
+      "cache_write_tokens": null,
+      "changed_files": 1,
+      "context_items": 30,
+      "context_tokens": 2931,
+      "error": null,
+      "estimated_cost_usd": null,
+      "input_tokens": 3085,
+      "latency_ms": 274.834,
+      "model": "mock",
+      "open_references": 2,
+      "output_tokens": 92,
+      "repetition": 1,
+      "retrieval_mode": "lexical_graph",
+      "stop_reason": "no_new_information",
+      "success": true,
+      "task_id": "debug-malformed-payload",
+      "test_exit_code": 0,
+      "token_budget": 4000,
+      "tokens_left_unused": 1069,
+      "total_prompt_tokens": 3085,
+      "void": false
+    },
+    {
+      "arm": "graph_only",
+      "cache_read_tokens": null,
+      "cache_write_tokens": null,
+      "changed_files": 1,
+      "context_items": 43,
+      "context_tokens": 3925,
+      "error": null,
+      "estimated_cost_usd": null,
+      "input_tokens": 4079,
+      "latency_ms": 272.086,
+      "model": "mock",
+      "open_references": 3,
+      "output_tokens": 92,
+      "repetition": 1,
+      "retrieval_mode": "graph",
+      "stop_reason": "score_cliff",
+      "success": true,
+      "task_id": "debug-malformed-payload",
+      "test_exit_code": 0,
+      "token_budget": 4000,
+      "tokens_left_unused": 73,
+      "total_prompt_tokens": 4079,
+      "void": false
+    },
+    {
+      "arm": "graph_escalate",
+      "cache_read_tokens": null,
+      "cache_write_tokens": null,
+      "changed_files": 1,
+      "context_items": 33,
+      "context_tokens": 3954,
+      "error": null,
+      "estimated_cost_usd": null,
+      "input_tokens": 4109,
+      "latency_ms": 297.018,
+      "model": "mock",
+      "open_references": 2,
+      "output_tokens": 92,
+      "repetition": 1,
+      "retrieval_mode": "graph_escalate",
+      "stop_reason": "score_cliff",
+      "success": true,
+      "task_id": "debug-malformed-payload",
+      "test_exit_code": 0,
+      "token_budget": 4000,
+      "tokens_left_unused": 45,
+      "total_prompt_tokens": 4109,
+      "void": false
+    },
+    {
+      "arm": "classic",
+      "cache_read_tokens": null,
+      "cache_write_tokens": null,
+      "changed_files": 0,
+      "context_items": 30,
+      "context_tokens": 2448,
+      "error": "test_decimal_price_uses_exact_cents (test_billing.BillingTest) ... FAIL\n\n======================================================================\nFAIL: test_decimal_price_uses_exact_cents (test_billing.BillingTest)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/private/var/folders/8x/0tsp261502d33cyc69x4pj200000gn/T/graph-context-zqzm6phf/haystack_currency_rounding_bug/tests/test_billing.py\", line 8, in test_decimal_price_uses_exact_cents\n    self.assertEqual(charge_invoice(1.15), 115)\nAssertionError: 114 != 115\n\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nFAILED (failures=1)",
+      "estimated_cost_usd": null,
+      "input_tokens": 2602,
+      "latency_ms": 274.327,
+      "model": "mock",
+      "open_references": 1,
+      "output_tokens": 21,
+      "repetition": 1,
+      "retrieval_mode": "lexical",
+      "stop_reason": "no_new_information",
+      "success": false,
+      "task_id": "debug-currency-rounding",
+      "test_exit_code": 1,
+      "token_budget": 4000,
+      "tokens_left_unused": 1548,
+      "total_prompt_tokens": 2602,
+      "void": false
+    },
+    {
+      "arm": "graphrag",
+      "cache_read_tokens": null,
+      "cache_write_tokens": null,
+      "changed_files": 0,
+      "context_items": 30,
+      "context_tokens": 2820,
+      "error": "test_decimal_price_uses_exact_cents (test_billing.BillingTest) ... FAIL\n\n======================================================================\nFAIL: test_decimal_price_uses_exact_cents (test_billing.BillingTest)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/private/var/folders/8x/0tsp261502d33cyc69x4pj200000gn/T/graph-context-gm_vojc8/haystack_currency_rounding_bug/tests/test_billing.py\", line 8, in test_decimal_price_uses_exact_cents\n    self.assertEqual(charge_invoice(1.15), 115)\nAssertionError: 114 != 115\n\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nFAILED (failures=1)",
+      "estimated_cost_usd": null,
+      "input_tokens": 2973,
+      "latency_ms": 300.342,
+      "model": "mock",
+      "open_references": 1,
+      "output_tokens": 21,
+      "repetition": 1,
+      "retrieval_mode": "lexical_graph",
+      "stop_reason": "no_new_information",
+      "success": false,
+      "task_id": "debug-currency-rounding",
+      "test_exit_code": 1,
+      "token_budget": 4000,
+      "tokens_left_unused": 1182,
+      "total_prompt_tokens": 2973,
+      "void": false
+    },
+    {
+      "arm": "graph_only",
+      "cache_read_tokens": null,
+      "cache_write_tokens": null,
+      "changed_files": 1,
+      "context_items": 3,
+      "context_tokens": 359,
+      "error": null,
+      "estimated_cost_usd": null,
+      "input_tokens": 512,
+      "latency_ms": 280.842,
+      "model": "mock",
+      "open_references": 0,
+      "output_tokens": 63,
+      "repetition": 1,
+      "retrieval_mode": "graph",
+      "stop_reason": "closure",
+      "success": true,
+      "task_id": "debug-currency-rounding",
+      "test_exit_code": 0,
+      "token_budget": 4000,
+      "tokens_left_unused": 3641,
+      "total_prompt_tokens": 512,
+      "void": false
+    },
+    {
+      "arm": "graph_escalate",
+      "cache_read_tokens": null,
+      "cache_write_tokens": null,
+      "changed_files": 1,
+      "context_items": 3,
+      "context_tokens": 398,
+      "error": null,
+      "estimated_cost_usd": null,
+      "input_tokens": 552,
+      "latency_ms": 292.503,
+      "model": "mock",
+      "open_references": 0,
+      "output_tokens": 63,
+      "repetition": 1,
+      "retrieval_mode": "graph_escalate",
+      "stop_reason": "closure",
+      "success": true,
+      "task_id": "debug-currency-rounding",
+      "test_exit_code": 0,
+      "token_budget": 4000,
+      "tokens_left_unused": 3601,
+      "total_prompt_tokens": 552,
+      "void": false
+    },
+    {
+      "arm": "classic",
+      "cache_read_tokens": null,
+      "cache_write_tokens": null,
+      "changed_files": 0,
+      "context_items": 26,
+      "context_tokens": 2367,
+      "error": "test_admin_credentials_are_accepted (test_access.AccessTest) ... ERROR\ntest_write_only_credentials_are_rejected (test_access.AccessTest) ... FAIL\n\n======================================================================\nERROR: test_admin_credentials_are_accepted (test_access.AccessTest)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/private/var/folders/8x/0tsp261502d33cyc69x4pj200000gn/T/graph-context-7b1vkl_7/haystack_authorization_scope_bug/tests/test_access.py\", line 12, in test_admin_credentials_are_accepted\n    self.assertTrue(authorize_request([\"admin\"]))\n  File \"/private/var/folders/8x/0tsp261502d33cyc69x4pj200000gn/T/graph-context-7b1vkl_7/haystack_authorization_scope_bug/access.py\", line 6, in authorize_request\n    raise PermissionError(\"insufficient scope\")\nPermissionError: insufficient scope\n\n======================================================================\nFAIL: test_write_only_credentials_are_rejected (test_access.AccessTest)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/private/var/folders/8x/0tsp261502d33cyc69x4pj200000gn/T/graph-context-7b1vkl_7/haystack_authorization_scope_bug/tests/test_access.py\", line 9, in test_write_only_credentials_are_rejected\n    authorize_request([\"write\"])\nAssertionError: PermissionError not raised\n\n----------------------------------------------------------------------\nRan 2 tests in 0.001s\n\nFAILED (failures=1, errors=1)",
+      "estimated_cost_usd": null,
+      "input_tokens": 2525,
+      "latency_ms": 317.888,
+      "model": "mock",
+      "open_references": 2,
+      "output_tokens": 21,
+      "repetition": 1,
+      "retrieval_mode": "lexical",
+      "stop_reason": "no_new_information",
+      "success": false,
+      "task_id": "security-authorization-scope",
+      "test_exit_code": 1,
+      "token_budget": 4000,
+      "tokens_left_unused": 1630,
+      "total_prompt_tokens": 2525,
+      "void": false
+    },
+    {
+      "arm": "graphrag",
+      "cache_read_tokens": null,
+      "cache_write_tokens": null,
+      "changed_files": 0,
+      "context_items": 28,
+      "context_tokens": 2775,
+      "error": "test_admin_credentials_are_accepted (test_access.AccessTest) ... ERROR\ntest_write_only_credentials_are_rejected (test_access.AccessTest) ... FAIL\n\n======================================================================\nERROR: test_admin_credentials_are_accepted (test_access.AccessTest)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/private/var/folders/8x/0tsp261502d33cyc69x4pj200000gn/T/graph-context-_k89bmva/haystack_authorization_scope_bug/tests/test_access.py\", line 12, in test_admin_credentials_are_accepted\n    self.assertTrue(authorize_request([\"admin\"]))\n  File \"/private/var/folders/8x/0tsp261502d33cyc69x4pj200000gn/T/graph-context-_k89bmva/haystack_authorization_scope_bug/access.py\", line 6, in authorize_request\n    raise PermissionError(\"insufficient scope\")\nPermissionError: insufficient scope\n\n======================================================================\nFAIL: test_write_only_credentials_are_rejected (test_access.AccessTest)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/private/var/folders/8x/0tsp261502d33cyc69x4pj200000gn/T/graph-context-_k89bmva/haystack_authorization_scope_bug/tests/test_access.py\", line 9, in test_write_only_credentials_are_rejected\n    authorize_request([\"write\"])\nAssertionError: PermissionError not raised\n\n----------------------------------------------------------------------\nRan 2 tests in 0.001s\n\nFAILED (failures=1, errors=1)",
+      "estimated_cost_usd": null,
+      "input_tokens": 2933,
+      "latency_ms": 260.982,
+      "model": "mock",
+      "open_references": 2,
+      "output_tokens": 21,
+      "repetition": 1,
+      "retrieval_mode": "lexical_graph",
+      "stop_reason": "no_new_information",
+      "success": false,
+      "task_id": "security-authorization-scope",
+      "test_exit_code": 1,
+      "token_budget": 4000,
+      "tokens_left_unused": 1226,
+      "total_prompt_tokens": 2933,
+      "void": false
+    },
+    {
+      "arm": "graph_only",
+      "cache_read_tokens": null,
+      "cache_write_tokens": null,
+      "changed_files": 1,
+      "context_items": 44,
+      "context_tokens": 3945,
+      "error": null,
+      "estimated_cost_usd": null,
+      "input_tokens": 4103,
+      "latency_ms": 274.024,
+      "model": "mock",
+      "open_references": 4,
+      "output_tokens": 48,
+      "repetition": 1,
+      "retrieval_mode": "graph",
+      "stop_reason": "score_cliff",
+      "success": true,
+      "task_id": "security-authorization-scope",
+      "test_exit_code": 0,
+      "token_budget": 4000,
+      "tokens_left_unused": 55,
+      "total_prompt_tokens": 4103,
+      "void": false
+    },
+    {
+      "arm": "graph_escalate",
+      "cache_read_tokens": null,
+      "cache_write_tokens": null,
+      "changed_files": 1,
+      "context_items": 34,
+      "context_tokens": 3998,
+      "error": null,
+      "estimated_cost_usd": null,
+      "input_tokens": 4156,
+      "latency_ms": 298.929,
+      "model": "mock",
+      "open_references": 2,
+      "output_tokens": 48,
+      "repetition": 1,
+      "retrieval_mode": "graph_escalate",
+      "stop_reason": "token_budget",
+      "success": true,
+      "task_id": "security-authorization-scope",
+      "test_exit_code": 0,
+      "token_budget": 4000,
+      "tokens_left_unused": 0,
+      "total_prompt_tokens": 4156,
+      "void": false
+    },
+    {
+      "arm": "classic",
+      "cache_read_tokens": null,
+      "cache_write_tokens": null,
+      "changed_files": 0,
+      "context_items": 26,
+      "context_tokens": 2192,
+      "error": "test_second_attempt_can_retry (test_worker.WorkerTest) ... ok\ntest_third_attempt_is_the_final_attempt (test_worker.WorkerTest) ... FAIL\n\n======================================================================\nFAIL: test_third_attempt_is_the_final_attempt (test_worker.WorkerTest)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/private/var/folders/8x/0tsp261502d33cyc69x4pj200000gn/T/graph-context-zg1b27ie/haystack_retry_boundary_bug/tests/test_worker.py\", line 8, in test_third_attempt_is_the_final_attempt\n    self.assertFalse(execute_job(3))\nAssertionError: True is not false\n\n----------------------------------------------------------------------\nRan 2 tests in 0.001s\n\nFAILED (failures=1)",
+      "estimated_cost_usd": null,
+      "input_tokens": 2343,
+      "latency_ms": 279.357,
+      "model": "mock",
+      "open_references": 1,
+      "output_tokens": 21,
+      "repetition": 1,
+      "retrieval_mode": "lexical",
+      "stop_reason": "no_new_information",
+      "success": false,
+      "task_id": "debug-retry-boundary",
+      "test_exit_code": 1,
+      "token_budget": 4000,
+      "tokens_left_unused": 1805,
+      "total_prompt_tokens": 2343,
+      "void": false
+    },
+    {
+      "arm": "graphrag",
+      "cache_read_tokens": null,
+      "cache_write_tokens": null,
+      "changed_files": 0,
+      "context_items": 28,
+      "context_tokens": 2610,
+      "error": "test_second_attempt_can_retry (test_worker.WorkerTest) ... ok\ntest_third_attempt_is_the_final_attempt (test_worker.WorkerTest) ... FAIL\n\n======================================================================\nFAIL: test_third_attempt_is_the_final_attempt (test_worker.WorkerTest)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/private/var/folders/8x/0tsp261502d33cyc69x4pj200000gn/T/graph-context-4fkvb92n/haystack_retry_boundary_bug/tests/test_worker.py\", line 8, in test_third_attempt_is_the_final_attempt\n    self.assertFalse(execute_job(3))\nAssertionError: True is not false\n\n----------------------------------------------------------------------\nRan 2 tests in 0.001s\n\nFAILED (failures=1)",
+      "estimated_cost_usd": null,
+      "input_tokens": 2761,
+      "latency_ms": 296.268,
+      "model": "mock",
+      "open_references": 1,
+      "output_tokens": 21,
+      "repetition": 1,
+      "retrieval_mode": "lexical_graph",
+      "stop_reason": "no_new_information",
+      "success": false,
+      "task_id": "debug-retry-boundary",
+      "test_exit_code": 1,
+      "token_budget": 4000,
+      "tokens_left_unused": 1393,
+      "total_prompt_tokens": 2761,
+      "void": false
+    },
+    {
+      "arm": "graph_only",
+      "cache_read_tokens": null,
+      "cache_write_tokens": null,
+      "changed_files": 1,
+      "context_items": 4,
+      "context_tokens": 472,
+      "error": null,
+      "estimated_cost_usd": null,
+      "input_tokens": 623,
+      "latency_ms": 256.743,
+      "model": "mock",
+      "open_references": 0,
+      "output_tokens": 50,
+      "repetition": 1,
+      "retrieval_mode": "graph",
+      "stop_reason": "closure",
+      "success": true,
+      "task_id": "debug-retry-boundary",
+      "test_exit_code": 0,
+      "token_budget": 4000,
+      "tokens_left_unused": 3528,
+      "total_prompt_tokens": 623,
+      "void": false
+    },
+    {
+      "arm": "graph_escalate",
+      "cache_read_tokens": null,
+      "cache_write_tokens": null,
+      "changed_files": 1,
+      "context_items": 4,
+      "context_tokens": 524,
+      "error": null,
+      "estimated_cost_usd": null,
+      "input_tokens": 675,
+      "latency_ms": 288.124,
+      "model": "mock",
+      "open_references": 0,
+      "output_tokens": 50,
+      "repetition": 1,
+      "retrieval_mode": "graph_escalate",
+      "stop_reason": "closure",
+      "success": true,
+      "task_id": "debug-retry-boundary",
+      "test_exit_code": 0,
+      "token_budget": 4000,
+      "tokens_left_unused": 3477,
+      "total_prompt_tokens": 675,
+      "void": false
+    },
+    {
+      "arm": "classic",
+      "cache_read_tokens": null,
+      "cache_write_tokens": null,
+      "changed_files": 0,
+      "context_items": 27,
+      "context_tokens": 2189,
+      "error": "test_accented_title_is_ascii (test_slugs.SlugTest) ... FAIL\n\n======================================================================\nFAIL: test_accented_title_is_ascii (test_slugs.SlugTest)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/private/var/folders/8x/0tsp261502d33cyc69x4pj200000gn/T/graph-context-2gl_kjfw/haystack_unicode_slug_bug/tests/test_slugs.py\", line 8, in test_accented_title_is_ascii\n    self.assertEqual(make_slug(\"Cr\u00e8me Br\u00fbl\u00e9e\"), \"creme-brulee\")\nAssertionError: 'cr\u00e8me-br\u00fbl\u00e9e' != 'creme-brulee'\n- cr\u00e8me-br\u00fbl\u00e9e\n?   ^     ^ ^\n+ creme-brulee\n?   ^     ^ ^\n\n\n----------------------------------------------------------------------\nRan 1 test in 0.002s\n\nFAILED (failures=1)",
+      "estimated_cost_usd": null,
+      "input_tokens": 2332,
+      "latency_ms": 283.557,
+      "model": "mock",
+      "open_references": 1,
+      "output_tokens": 21,
+      "repetition": 1,
+      "retrieval_mode": "lexical",
+      "stop_reason": "no_new_information",
+      "success": false,
+      "task_id": "debug-unicode-slug",
+      "test_exit_code": 1,
+      "token_budget": 4000,
+      "tokens_left_unused": 1811,
+      "total_prompt_tokens": 2332,
+      "void": false
+    },
+    {
+      "arm": "graphrag",
+      "cache_read_tokens": null,
+      "cache_write_tokens": null,
+      "changed_files": 0,
+      "context_items": 28,
+      "context_tokens": 2582,
+      "error": "test_accented_title_is_ascii (test_slugs.SlugTest) ... FAIL\n\n======================================================================\nFAIL: test_accented_title_is_ascii (test_slugs.SlugTest)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/private/var/folders/8x/0tsp261502d33cyc69x4pj200000gn/T/graph-context-oavaac8i/haystack_unicode_slug_bug/tests/test_slugs.py\", line 8, in test_accented_title_is_ascii\n    self.assertEqual(make_slug(\"Cr\u00e8me Br\u00fbl\u00e9e\"), \"creme-brulee\")\nAssertionError: 'cr\u00e8me-br\u00fbl\u00e9e' != 'creme-brulee'\n- cr\u00e8me-br\u00fbl\u00e9e\n?   ^     ^ ^\n+ creme-brulee\n?   ^     ^ ^\n\n\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nFAILED (failures=1)",
+      "estimated_cost_usd": null,
+      "input_tokens": 2725,
+      "latency_ms": 312.498,
+      "model": "mock",
+      "open_references": 1,
+      "output_tokens": 21,
+      "repetition": 1,
+      "retrieval_mode": "lexical_graph",
+      "stop_reason": "no_new_information",
+      "success": false,
+      "task_id": "debug-unicode-slug",
+      "test_exit_code": 1,
+      "token_budget": 4000,
+      "tokens_left_unused": 1417,
+      "total_prompt_tokens": 2725,
+      "void": false
+    },
+    {
+      "arm": "graph_only",
+      "cache_read_tokens": null,
+      "cache_write_tokens": null,
+      "changed_files": 1,
+      "context_items": 3,
+      "context_tokens": 353,
+      "error": null,
+      "estimated_cost_usd": null,
+      "input_tokens": 495,
+      "latency_ms": 297.013,
+      "model": "mock",
+      "open_references": 0,
+      "output_tokens": 101,
+      "repetition": 1,
+      "retrieval_mode": "graph",
+      "stop_reason": "closure",
+      "success": true,
+      "task_id": "debug-unicode-slug",
+      "test_exit_code": 0,
+      "token_budget": 4000,
+      "tokens_left_unused": 3647,
+      "total_prompt_tokens": 495,
+      "void": false
+    },
+    {
+      "arm": "graph_escalate",
+      "cache_read_tokens": null,
+      "cache_write_tokens": null,
+      "changed_files": 1,
+      "context_items": 3,
+      "context_tokens": 392,
+      "error": null,
+      "estimated_cost_usd": null,
+      "input_tokens": 534,
+      "latency_ms": 273.76,
+      "model": "mock",
+      "open_references": 0,
+      "output_tokens": 101,
+      "repetition": 1,
+      "retrieval_mode": "graph_escalate",
+      "stop_reason": "closure",
+      "success": true,
+      "task_id": "debug-unicode-slug",
+      "test_exit_code": 0,
+      "token_budget": 4000,
+      "tokens_left_unused": 3608,
+      "total_prompt_tokens": 534,
+      "void": false
+    }
+  ],
+  "stopping_rule": {
+    "cliff_ratio": 0.15,
+    "min_items": 3,
+    "patience": 16,
+    "require_closure": true
+  },
+  "task_count": 6,
+  "token_budget_uniform": true,
+  "token_budgets_used": [
+    4000
+  ],
+  "variance": {
+    "arms": {
+      "classic": {
+        "metrics": {
+          "context_tokens": {
+            "cv": 0.06,
+            "max": 2461.0,
+            "mean": 2303.0,
+            "min": 2161.0,
+            "n": 6,
+            "sd": 138.2505
+          },
+          "input_tokens": {
+            "cv": 0.0584,
+            "max": 2615.0,
+            "mean": 2453.5,
+            "min": 2304.0,
+            "n": 6,
+            "sd": 143.2267
+          },
+          "latency_ms": {
+            "cv": 0.1521,
+            "max": 398.01,
+            "mean": 307.8102,
+            "min": 274.327,
+            "n": 6,
+            "sd": 46.8081
+          },
+          "output_tokens": {
+            "cv": 0.0,
+            "max": 21.0,
+            "mean": 21.0,
+            "min": 21.0,
+            "n": 6,
+            "sd": 0.0
+          },
+          "total_prompt_tokens": {
+            "cv": 0.0584,
+            "max": 2615.0,
+            "mean": 2453.5,
+            "min": 2304.0,
+            "n": 6,
+            "sd": 143.2267
+          }
+        },
+        "metrics_within_task": {
+          "context_tokens": null,
+          "input_tokens": null,
+          "latency_ms": null,
+          "output_tokens": null,
+          "total_prompt_tokens": null
+        },
+        "repetitions": {
+          "1": {
+            "graded_attempts": 6,
+            "success_rate": 0.0,
+            "successes": 0
+          }
+        },
+        "success_rate_by_repetition": [
+          0.0
+        ],
+        "success_rate_sd": null,
+        "success_rate_swing": null
+      },
+      "graph_escalate": {
+        "metrics": {
+          "context_tokens": {
+            "cv": 1.0645,
+            "max": 3998.0,
+            "mean": 1678.0,
+            "min": 392.0,
+            "n": 6,
+            "sd": 1786.2734
+          },
+          "input_tokens": {
+            "cv": 0.9792,
+            "max": 4156.0,
+            "mean": 1828.6667,
+            "min": 534.0,
+            "n": 6,
+            "sd": 1790.6696
+          },
+          "latency_ms": {
+            "cv": 0.031,
+            "max": 298.929,
+            "mean": 290.2807,
+            "min": 273.76,
+            "n": 6,
+            "sd": 8.9872
+          },
+          "output_tokens": {
+            "cv": 0.3321,
+            "max": 102.0,
+            "mean": 76.0,
+            "min": 48.0,
+            "n": 6,
+            "sd": 25.2428
+          },
+          "total_prompt_tokens": {
+            "cv": 0.9792,
+            "max": 4156.0,
+            "mean": 1828.6667,
+            "min": 534.0,
+            "n": 6,
+            "sd": 1790.6696
+          }
+        },
+        "metrics_within_task": {
+          "context_tokens": null,
+          "input_tokens": null,
+          "latency_ms": null,
+          "output_tokens": null,
+          "total_prompt_tokens": null
+        },
+        "repetitions": {
+          "1": {
+            "graded_attempts": 6,
+            "success_rate": 1.0,
+            "successes": 6
+          }
+        },
+        "success_rate_by_repetition": [
+          1.0
+        ],
+        "success_rate_sd": null,
+        "success_rate_swing": null
+      },
+      "graph_only": {
+        "metrics": {
+          "context_tokens": {
+            "cv": 1.1061,
+            "max": 3945.0,
+            "mean": 1622.8333,
+            "min": 353.0,
+            "n": 6,
+            "sd": 1794.9866
+          },
+          "input_tokens": {
+            "cv": 1.0149,
+            "max": 4103.0,
+            "mean": 1773.0,
+            "min": 495.0,
+            "n": 6,
+            "sd": 1799.4027
+          },
+          "latency_ms": {
+            "cv": 0.0798,
+            "max": 321.423,
+            "mean": 283.6885,
+            "min": 256.743,
+            "n": 6,
+            "sd": 22.6434
+          },
+          "output_tokens": {
+            "cv": 0.3321,
+            "max": 102.0,
+            "mean": 76.0,
+            "min": 48.0,
+            "n": 6,
+            "sd": 25.2428
+          },
+          "total_prompt_tokens": {
+            "cv": 1.0149,
+            "max": 4103.0,
+            "mean": 1773.0,
+            "min": 495.0,
+            "n": 6,
+            "sd": 1799.4027
+          }
+        },
+        "metrics_within_task": {
+          "context_tokens": null,
+          "input_tokens": null,
+          "latency_ms": null,
+          "output_tokens": null,
+          "total_prompt_tokens": null
+        },
+        "repetitions": {
+          "1": {
+            "graded_attempts": 6,
+            "success_rate": 1.0,
+            "successes": 6
+          }
+        },
+        "success_rate_by_repetition": [
+          1.0
+        ],
+        "success_rate_sd": null,
+        "success_rate_swing": null
+      },
+      "graphrag": {
+        "metrics": {
+          "context_tokens": {
+            "cv": 0.0621,
+            "max": 2931.0,
+            "mean": 2700.8333,
+            "min": 2487.0,
+            "n": 6,
+            "sd": 167.7944
+          },
+          "input_tokens": {
+            "cv": 0.0606,
+            "max": 3085.0,
+            "mean": 2851.1667,
+            "min": 2630.0,
+            "n": 6,
+            "sd": 172.7315
+          },
+          "latency_ms": {
+            "cv": 0.0827,
+            "max": 327.924,
+            "mean": 295.4747,
+            "min": 260.982,
+            "n": 6,
+            "sd": 24.4248
+          },
+          "output_tokens": {
+            "cv": 0.8828,
+            "max": 92.0,
+            "mean": 32.8333,
+            "min": 21.0,
+            "n": 6,
+            "sd": 28.9856
+          },
+          "total_prompt_tokens": {
+            "cv": 0.0606,
+            "max": 3085.0,
+            "mean": 2851.1667,
+            "min": 2630.0,
+            "n": 6,
+            "sd": 172.7315
+          }
+        },
+        "metrics_within_task": {
+          "context_tokens": null,
+          "input_tokens": null,
+          "latency_ms": null,
+          "output_tokens": null,
+          "total_prompt_tokens": null
+        },
+        "repetitions": {
+          "1": {
+            "graded_attempts": 6,
+            "success_rate": 0.1667,
+            "successes": 1
+          }
+        },
+        "success_rate_by_repetition": [
+          0.1667
+        ],
+        "success_rate_sd": null,
+        "success_rate_swing": null
+      }
+    },
+    "between_arm_success_spread": 1.0,
+    "max_within_arm_success_swing": null,
+    "note": "A success delta is interpretable only when it exceeds the largest within-arm swing. Continuous endpoints (output tokens, latency) carry their own dispersion under arms.<arm>.metrics and should be preferred when this verdict is false or null.",
+    "paired_intervals": {
+      "baseline_arm": "classic",
+      "metrics": {
+        "context_tokens": {
+          "ci95": [
+            362.6667,
+            433.6667
+          ],
+          "excludes_zero": true,
+          "iterations": 4000,
+          "mean_delta": 397.8333,
+          "n_pairs": 6,
+          "seed": 20260822
+        },
+        "input_tokens": {
+          "ci95": [
+            362.5,
+            433.6667
+          ],
+          "excludes_zero": true,
+          "iterations": 4000,
+          "mean_delta": 397.6667,
+          "n_pairs": 6,
+          "seed": 20260822
+        },
+        "latency_ms": {
+          "ci95": [
+            -43.3395,
+            17.9892
+          ],
+          "excludes_zero": false,
+          "iterations": 4000,
+          "mean_delta": -12.3355,
+          "n_pairs": 6,
+          "seed": 20260822
+        },
+        "output_tokens": {
+          "ci95": [
+            0.0,
+            35.5
+          ],
+          "excludes_zero": false,
+          "iterations": 4000,
+          "mean_delta": 11.8333,
+          "n_pairs": 6,
+          "seed": 20260822
+        },
+        "success": {
+          "ci95": [
+            0.0,
+            0.5
+          ],
+          "excludes_zero": false,
+          "iterations": 4000,
+          "mean_delta": 0.1667,
+          "n_pairs": 6,
+          "seed": 20260822
+        },
+        "total_prompt_tokens": {
+          "ci95": [
+            362.5,
+            433.6667
+          ],
+          "excludes_zero": true,
+          "iterations": 4000,
+          "mean_delta": 397.6667,
+          "n_pairs": 6,
+          "seed": 20260822
+        }
+      },
+      "treatment_arm": "graphrag"
+    },
+    "repetitions": 1,
+    "success_deltas_interpretable": null
+  }
+}

@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Dict, List, Optional, Sequence
 
-from .compiler import ContextCompiler
+from .compiler import ContextCompiler, StoppingRule
 from .indexer import RepositoryIndexer
 from .retrieval import HybridRetriever, classify_task
 from .store import GraphStore
@@ -11,14 +11,17 @@ DEFAULT_STATE_DIRECTORY = ".context-compiler"
 
 
 class ContextService:
-    def __init__(self, repository: Path, database: Optional[Path] = None):
+    def __init__(self, repository: Path, database: Optional[Path] = None,
+                 stopping: Optional[StoppingRule] = None):
         self.repository = repository.resolve()
         self.database = database or (
             self.repository / DEFAULT_STATE_DIRECTORY / "graph.sqlite3"
         )
         self.store = GraphStore(self.database)
         self.retriever = HybridRetriever(self.store)
-        self.compiler = ContextCompiler(self.retriever)
+        # `stopping` is a manipulated variable: passing an enabled rule changes
+        # what every arm packs, so callers opt in per experiment.
+        self.compiler = ContextCompiler(self.retriever, stopping=stopping)
 
     def close(self) -> None:
         self.store.close()
@@ -101,6 +104,10 @@ class ContextService:
                 for item in result.items
             ],
             "context": result.rendered,
+            # Why packing stopped, including how much budget was deliberately
+            # left unused. An arm that always reports "token_budget" is filling
+            # the budget rather than deciding it has enough.
+            "stopping": result.stopping,
         }
 
     def impact(self, symbol: str, depth: int = 2, limit: int = 40) -> Dict[str, object]:

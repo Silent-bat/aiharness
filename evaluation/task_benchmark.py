@@ -21,10 +21,13 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence
 
-from context_compiler.compiler import estimate_tokens
+from context_compiler.compiler import StoppingRule, estimate_tokens
+from context_compiler.retrieval import RETRIEVAL_MODES
 from context_compiler.providers import (ChatResponse, ModelClient, ProviderConfig,
                                         Usage, load_env_file)
 from context_compiler.service import ContextService
+
+from evaluation.variance import variance_report
 
 
 # Ablation arms: display name -> (retrieval mode, human label).
@@ -37,6 +40,18 @@ ARMS: Dict[str, Dict[str, str]] = {
     "graphrag": {"mode": "lexical_graph", "label": "lexical + graph (GraphRAG CLI)"},
     "lexical_vector_graph": {"mode": "lexical_vector_graph",
                              "label": "lexical + vector + graph"},
+    # Rank-normalized and conditional replacements for the weighted hybrids
+    # above. The weighted sum compares bm25, cosine, and path decay on
+    # incomparable scales, and three separate results say that is what makes the
+    # hybrid arms lose to the graph alone.
+    "graphrag_rrf": {"mode": "lexical_graph_rrf",
+                     "label": "lexical + graph, reciprocal-rank fusion"},
+    "lexical_vector_graph_rrf": {"mode": "lexical_vector_graph_rrf",
+                                 "label": "lexical + vector + graph, RRF"},
+    "graph_escalate": {"mode": "graph_escalate",
+                       "label": "graph first, lexical only on an empty frontier"},
+    "graph_escalate_vector": {"mode": "graph_escalate_vector",
+                              "label": "graph first, lexical + vector on an empty frontier"},
     "oracle": {"mode": "oracle", "label": "oracle human-selected context"},
 }
 
@@ -65,6 +80,12 @@ class RunResult:
     # input_tokens counts only what the provider billed as fresh. A cached
     # read is still context the model saw, so cost claims must use the sum.
     total_prompt_tokens: Optional[int] = None
+    # Which sufficiency condition ended evidence selection, and how much of the
+    # budget was deliberately left unspent. An arm that always reports
+    # "token_budget" with zero left over is filling its window, not deciding.
+    stop_reason: Optional[str] = None
+    tokens_left_unused: Optional[int] = None
+    open_references: Optional[int] = None
     # A trial where the provider returned no content at all is a harness failure,
     # not a model failure. Scoring it as a loss transfers provider flakiness into
     # the arm's success rate, and whichever arm happens to draw the empty response
@@ -239,7 +260,8 @@ def run_task(task: Mapping[str, Any], arm: str, *, provider: Optional[ModelClien
              token_budget: int, max_tokens: Optional[int], input_rate: Optional[float],
              output_rate: Optional[float], cache_read_rate: Optional[float] = None,
              repetition: int = 1, force_token_budget: bool = False,
-             max_items: Optional[int] = None, cache_bust: bool = True) -> RunResult:
+             max_items: Optional[int] = None, cache_bust: bool = True,
+             stopping: Optional[StoppingRule] = None) -> RunResult:
     if arm not in ARMS:
         raise ValueError("unknown arm {!r}; expected one of {}".format(arm, ", ".join(ARMS)))
     mode = ARMS[arm]["mode"]
@@ -255,13 +277,16 @@ def run_task(task: Mapping[str, Any], arm: str, *, provider: Optional[ModelClien
         root = Path(temporary) / source.name
         shutil.copytree(source, root)
         started = time.perf_counter()
-        context_service = ContextService(root)
+        context_service = ContextService(root, stopping=stopping)
         try:
             context_service.index()
             compiled = context_service.compile_context(
                 str(task["prompt"]), token_budget=effective_budget,
                 task_type=task.get("task_type"),
-                graph_depth=2 if mode.endswith("graph") else 0,
+                # Read the depth off the mode rather than inferring it from the
+                # name: `graph_escalate` and the RRF variants use traversal too,
+                # and a name-suffix test silently gave them depth 0.
+                graph_depth=RETRIEVAL_MODES[mode].graph_depth if mode in RETRIEVAL_MODES else 0,
                 max_items=int(max_items if max_items is not None
                               else task.get("max_items", 20)),
                 mode=mode,
@@ -329,6 +354,9 @@ def run_task(task: Mapping[str, Any], arm: str, *, provider: Optional[ModelClien
                          retrieval_mode=mode,
                          context_items=int(compiled["item_count"]),
                          total_prompt_tokens=(usage.input_tokens or 0) + (usage.cache_read_tokens or 0),
+                         stop_reason=(compiled.get("stopping") or {}).get("reason"),
+                         tokens_left_unused=(compiled.get("stopping") or {}).get("tokens_left_unused"),
+                         open_references=(compiled.get("stopping") or {}).get("open_references"),
                          void=void,
                          error=error)
 
@@ -339,7 +367,8 @@ def benchmark(tasks: Iterable[Mapping[str, Any]], *, mock: bool, token_budget: i
               codex_cli: bool = False, arms: Sequence[str] = DEFAULT_ARMS,
               baseline_arm: str = "classic", treatment_arm: str = "graphrag",
               force_token_budget: bool = False, cache_bust: bool = True,
-              max_items: Optional[int] = None) -> Dict[str, Any]:
+              max_items: Optional[int] = None,
+              stopping: Optional[StoppingRule] = None) -> Dict[str, Any]:
     tasks = list(tasks)
     arms = list(dict.fromkeys(arms))
     unknown = [arm for arm in arms if arm not in ARMS]
@@ -357,7 +386,8 @@ def benchmark(tasks: Iterable[Mapping[str, Any]], *, mock: bool, token_budget: i
                                         cache_read_rate=cache_read_rate,
                                         repetition=repetition,
                                         force_token_budget=force_token_budget,
-                                        max_items=max_items, cache_bust=cache_bust))
+                                        max_items=max_items, cache_bust=cache_bust,
+                                        stopping=stopping))
     rows = [asdict(row) for row in results]
     budgets = sorted({row["token_budget"] for row in rows if row["token_budget"] is not None})
     summary: Dict[str, Any] = {
@@ -368,6 +398,11 @@ def benchmark(tasks: Iterable[Mapping[str, Any]], *, mock: bool, token_budget: i
         # comparison a top-20 ranking test rather than an iso-token test.
         "max_items": max_items,
         "max_items_uniform": max_items is not None,
+        "stopping_rule": (None if stopping is None or not stopping.enabled
+                          else {"cliff_ratio": stopping.cliff_ratio,
+                                "patience": stopping.patience,
+                                "min_items": stopping.min_items,
+                                "require_closure": stopping.require_closure}),
         # Arms share a prompt prefix; without a per-call nonce the arm that runs
         # second is billed a fraction of the first arm's input tokens.
         "cache_bust": cache_bust,
@@ -400,7 +435,15 @@ def benchmark(tasks: Iterable[Mapping[str, Any]], *, mock: bool, token_budget: i
                         "total_input_tokens": sum(row["input_tokens"] or 0 for row in arm_rows),
                         "total_output_tokens": sum(row["output_tokens"] or 0 for row in arm_rows),
                         "total_cache_read_tokens": sum(row["cache_read_tokens"] or 0 for row in arm_rows),
-                        "total_cost_usd": sum(row["estimated_cost_usd"] or 0 for row in arm_rows)}
+                        "total_cost_usd": sum(row["estimated_cost_usd"] or 0 for row in arm_rows),
+                        # Sufficiency accounting. `mean_tokens_left_unused` is the
+                        # quantity the stopping rule is supposed to move: budget an
+                        # arm chose not to spend while still passing.
+                        "stop_reasons": _count_stop_reasons(arm_rows),
+                        "mean_tokens_left_unused": (
+                            sum(row["tokens_left_unused"] or 0 for row in arm_rows) / len(arm_rows)),
+                        "mean_open_references": (
+                            sum(row["open_references"] or 0 for row in arm_rows) / len(arm_rows))}
     by_task: Dict[Any, Dict[str, Any]] = {}
     for row in rows:
         by_task.setdefault((row["task_id"], row["repetition"]), {})[row["arm"]] = row
@@ -435,7 +478,21 @@ def benchmark(tasks: Iterable[Mapping[str, Any]], *, mock: bool, token_budget: i
             for arms_row in pairs
         ])
     summary["marginal_graph_contribution"] = _marginal_contribution(summary, arms)
+    # Within-arm dispersion, and the verdict on whether any success delta in this
+    # summary clears it. With `repetitions=1` the verdict is null rather than
+    # true: one run per arm cannot distinguish an effect from a coin flip, which
+    # is how the first live comparison reported variance as a finding.
+    summary["variance"] = variance_report(rows, arms=arms, baseline_arm=baseline_arm,
+                                          treatment_arm=treatment_arm)
     return summary
+
+
+def _count_stop_reasons(rows: Sequence[Mapping[str, Any]]) -> Dict[str, int]:
+    counts: Dict[str, int] = {}
+    for row in rows:
+        reason = row.get("stop_reason") or "unrecorded"
+        counts[reason] = counts.get(reason, 0) + 1
+    return counts
 
 
 def _marginal_contribution(summary: Mapping[str, Any], arms: Sequence[str]) -> Dict[str, Any]:
@@ -479,6 +536,20 @@ def main() -> int:
                         help="run every ablation arm: {}".format(", ".join(sorted(ARMS))))
     parser.add_argument("--baseline-arm", default="classic", choices=sorted(ARMS))
     parser.add_argument("--treatment-arm", default="graphrag", choices=sorted(ARMS))
+    parser.add_argument("--stopping", action="store_true",
+                        help="stop packing evidence at sufficiency (reference closure, score "
+                             "cliff, or a flat tail) instead of at the token budget; this is a "
+                             "manipulated variable, so compare against a run without it")
+    parser.add_argument("--stopping-cliff", type=float, default=StoppingRule.cliff_ratio,
+                        help="stop when the next candidate scores below this fraction of the best")
+    parser.add_argument("--stopping-patience", type=int, default=StoppingRule.patience,
+                        help="stop after this many consecutive candidates that add no new file "
+                             "and close no outstanding reference")
+    parser.add_argument("--stopping-min-items", type=int, default=StoppingRule.min_items,
+                        help="never stop on sufficiency before this many items are selected")
+    parser.add_argument("--stopping-ignore-closure", action="store_true",
+                        help="disable the reference-closure condition, leaving only the score "
+                             "cliff and the flat-tail patience")
     parser.add_argument("--output", type=Path, help="also write the JSON report to this path")
     parser.add_argument("--no-cache-bust", action="store_true",
                         help="allow arms to share the provider prompt cache; makes "
@@ -517,7 +588,12 @@ def main() -> int:
                        treatment_arm=args.treatment_arm,
                        force_token_budget=args.force_token_budget,
                        max_items=args.max_items,
-                       cache_bust=not args.no_cache_bust)
+                       cache_bust=not args.no_cache_bust,
+                       stopping=(StoppingRule(cliff_ratio=args.stopping_cliff,
+                                              patience=args.stopping_patience,
+                                              min_items=args.stopping_min_items,
+                                              require_closure=not args.stopping_ignore_closure)
+                                 if args.stopping else None))
     rendered = json.dumps(report, indent=2, sort_keys=True)
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)

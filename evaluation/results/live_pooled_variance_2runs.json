@@ -1,0 +1,577 @@
+{
+  "arms": {
+    "classic": {
+      "metrics": {
+        "context_tokens": {
+          "cv": 0.0049,
+          "max": 4001.0,
+          "mean": 3973.6667,
+          "min": 3955.0,
+          "n": 12,
+          "sd": 19.2936
+        },
+        "input_tokens": {
+          "cv": 0.0206,
+          "max": 3694.0,
+          "mean": 3583.8182,
+          "min": 3434.0,
+          "n": 11,
+          "sd": 73.9551
+        },
+        "latency_ms": {
+          "cv": 0.8111,
+          "max": 177086.002,
+          "mean": 66506.652,
+          "min": 3632.84,
+          "n": 12,
+          "sd": 53945.9535
+        },
+        "output_tokens": {
+          "cv": 0.6918,
+          "max": 4710.0,
+          "mean": 1573.9091,
+          "min": 641.0,
+          "n": 11,
+          "sd": 1088.7887
+        },
+        "total_prompt_tokens": {
+          "cv": 0.3156,
+          "max": 3758.0,
+          "mean": 3343.8333,
+          "min": 0.0,
+          "n": 12,
+          "sd": 1055.3926
+        }
+      },
+      "repetitions": {
+        "1": {
+          "graded_attempts": 6,
+          "success_rate": 0.5,
+          "successes": 3
+        },
+        "2": {
+          "graded_attempts": 6,
+          "success_rate": 1.0,
+          "successes": 6
+        }
+      },
+      "success_rate_by_repetition": [
+        0.5,
+        1.0
+      ],
+      "success_rate_sd": 0.3536,
+      "success_rate_swing": 0.5
+    },
+    "full_file": {
+      "metrics": {
+        "context_tokens": {
+          "cv": 0.0042,
+          "max": 3996.0,
+          "mean": 3976.5,
+          "min": 3951.0,
+          "n": 12,
+          "sd": 16.6542
+        },
+        "input_tokens": {
+          "cv": 0.0045,
+          "max": 3019.0,
+          "mean": 2996.0833,
+          "min": 2980.0,
+          "n": 12,
+          "sd": 13.4263
+        },
+        "latency_ms": {
+          "cv": 0.7671,
+          "max": 149952.277,
+          "mean": 64844.5208,
+          "min": 12983.381,
+          "n": 12,
+          "sd": 49742.1299
+        },
+        "output_tokens": {
+          "cv": 0.8391,
+          "max": 4443.0,
+          "mean": 1488.6667,
+          "min": 303.0,
+          "n": 12,
+          "sd": 1249.1407
+        },
+        "total_prompt_tokens": {
+          "cv": 0.0044,
+          "max": 3083.0,
+          "mean": 3060.0833,
+          "min": 3044.0,
+          "n": 12,
+          "sd": 13.4263
+        }
+      },
+      "repetitions": {
+        "1": {
+          "graded_attempts": 6,
+          "success_rate": 0.5,
+          "successes": 3
+        },
+        "2": {
+          "graded_attempts": 6,
+          "success_rate": 0.6667,
+          "successes": 4
+        }
+      },
+      "success_rate_by_repetition": [
+        0.5,
+        0.6667
+      ],
+      "success_rate_sd": 0.1179,
+      "success_rate_swing": 0.1667
+    },
+    "graph_only": {
+      "metrics": {
+        "context_tokens": {
+          "cv": 0.0049,
+          "max": 3999.0,
+          "mean": 3975.1667,
+          "min": 3945.0,
+          "n": 12,
+          "sd": 19.3383
+        },
+        "input_tokens": {
+          "cv": 0.022,
+          "max": 3607.0,
+          "mean": 3496.6667,
+          "min": 3381.0,
+          "n": 12,
+          "sd": 77.0859
+        },
+        "latency_ms": {
+          "cv": 0.437,
+          "max": 47384.852,
+          "mean": 29182.6147,
+          "min": 10524.839,
+          "n": 12,
+          "sd": 12752.3772
+        },
+        "output_tokens": {
+          "cv": 0.6741,
+          "max": 1492.0,
+          "mean": 577.3333,
+          "min": 236.0,
+          "n": 12,
+          "sd": 389.1719
+        },
+        "total_prompt_tokens": {
+          "cv": 0.0216,
+          "max": 3671.0,
+          "mean": 3560.6667,
+          "min": 3445.0,
+          "n": 12,
+          "sd": 77.0859
+        }
+      },
+      "repetitions": {
+        "1": {
+          "graded_attempts": 6,
+          "success_rate": 1.0,
+          "successes": 6
+        },
+        "2": {
+          "graded_attempts": 6,
+          "success_rate": 1.0,
+          "successes": 6
+        }
+      },
+      "success_rate_by_repetition": [
+        1.0,
+        1.0
+      ],
+      "success_rate_sd": 0.0,
+      "success_rate_swing": 0.0
+    },
+    "graphrag": {
+      "metrics": {
+        "context_tokens": {
+          "cv": 0.0047,
+          "max": 4000.0,
+          "mean": 3980.3333,
+          "min": 3950.0,
+          "n": 12,
+          "sd": 18.7293
+        },
+        "input_tokens": {
+          "cv": 0.0223,
+          "max": 3614.0,
+          "mean": 3481.5,
+          "min": 3382.0,
+          "n": 12,
+          "sd": 77.5705
+        },
+        "latency_ms": {
+          "cv": 0.693,
+          "max": 202877.804,
+          "mean": 69586.3352,
+          "min": 31310.799,
+          "n": 12,
+          "sd": 48224.3134
+        },
+        "output_tokens": {
+          "cv": 0.4416,
+          "max": 3209.0,
+          "mean": 1544.75,
+          "min": 843.0,
+          "n": 12,
+          "sd": 682.0976
+        },
+        "total_prompt_tokens": {
+          "cv": 0.0219,
+          "max": 3678.0,
+          "mean": 3545.5,
+          "min": 3446.0,
+          "n": 12,
+          "sd": 77.5705
+        }
+      },
+      "repetitions": {
+        "1": {
+          "graded_attempts": 6,
+          "success_rate": 1.0,
+          "successes": 6
+        },
+        "2": {
+          "graded_attempts": 6,
+          "success_rate": 1.0,
+          "successes": 6
+        }
+      },
+      "success_rate_by_repetition": [
+        1.0,
+        1.0
+      ],
+      "success_rate_sd": 0.0,
+      "success_rate_swing": 0.0
+    },
+    "lexical_vector": {
+      "metrics": {
+        "context_tokens": {
+          "cv": 0.0033,
+          "max": 3994.0,
+          "mean": 3974.3333,
+          "min": 3957.0,
+          "n": 12,
+          "sd": 13.0268
+        },
+        "input_tokens": {
+          "cv": 0.0249,
+          "max": 3780.0,
+          "mean": 3640.1818,
+          "min": 3516.0,
+          "n": 11,
+          "sd": 90.6475
+        },
+        "latency_ms": {
+          "cv": 0.9413,
+          "max": 302015.019,
+          "mean": 81385.1672,
+          "min": 23524.231,
+          "n": 12,
+          "sd": 76610.7658
+        },
+        "output_tokens": {
+          "cv": 0.7867,
+          "max": 5350.0,
+          "mean": 1771.9091,
+          "min": 473.0,
+          "n": 11,
+          "sd": 1393.9975
+        },
+        "total_prompt_tokens": {
+          "cv": 0.3159,
+          "max": 3844.0,
+          "mean": 3395.5,
+          "min": 0.0,
+          "n": 12,
+          "sd": 1072.7924
+        }
+      },
+      "repetitions": {
+        "1": {
+          "graded_attempts": 6,
+          "success_rate": 0.8333,
+          "successes": 5
+        },
+        "2": {
+          "graded_attempts": 6,
+          "success_rate": 0.6667,
+          "successes": 4
+        }
+      },
+      "success_rate_by_repetition": [
+        0.8333,
+        0.6667
+      ],
+      "success_rate_sd": 0.1178,
+      "success_rate_swing": 0.1666
+    },
+    "lexical_vector_graph": {
+      "metrics": {
+        "context_tokens": {
+          "cv": 0.0045,
+          "max": 4002.0,
+          "mean": 3980.3333,
+          "min": 3953.0,
+          "n": 12,
+          "sd": 17.9865
+        },
+        "input_tokens": {
+          "cv": 0.0232,
+          "max": 3658.0,
+          "mean": 3553.9091,
+          "min": 3445.0,
+          "n": 11,
+          "sd": 82.6153
+        },
+        "latency_ms": {
+          "cv": 0.7474,
+          "max": 152947.238,
+          "mean": 64376.7568,
+          "min": 2898.364,
+          "n": 12,
+          "sd": 48116.1816
+        },
+        "output_tokens": {
+          "cv": 0.5936,
+          "max": 3004.0,
+          "mean": 1312.1818,
+          "min": 592.0,
+          "n": 11,
+          "sd": 778.9082
+        },
+        "total_prompt_tokens": {
+          "cv": 0.3158,
+          "max": 3722.0,
+          "mean": 3316.4167,
+          "min": 0.0,
+          "n": 12,
+          "sd": 1047.3667
+        }
+      },
+      "repetitions": {
+        "1": {
+          "graded_attempts": 6,
+          "success_rate": 0.8333,
+          "successes": 5
+        },
+        "2": {
+          "graded_attempts": 6,
+          "success_rate": 0.8333,
+          "successes": 5
+        }
+      },
+      "success_rate_by_repetition": [
+        0.8333,
+        0.8333
+      ],
+      "success_rate_sd": 0.0,
+      "success_rate_swing": 0.0
+    },
+    "oracle": {
+      "metrics": {
+        "context_tokens": {
+          "cv": 0.1438,
+          "max": 479.0,
+          "mean": 379.3333,
+          "min": 330.0,
+          "n": 12,
+          "sd": 54.5649
+        },
+        "input_tokens": {
+          "cv": 0.0683,
+          "max": 461.0,
+          "mean": 405.6667,
+          "min": 381.0,
+          "n": 12,
+          "sd": 27.7172
+        },
+        "latency_ms": {
+          "cv": 1.3453,
+          "max": 154357.904,
+          "mean": 32866.0752,
+          "min": 4369.24,
+          "n": 12,
+          "sd": 44215.5217
+        },
+        "output_tokens": {
+          "cv": 0.4468,
+          "max": 702.0,
+          "mean": 341.5,
+          "min": 109.0,
+          "n": 12,
+          "sd": 152.5847
+        },
+        "total_prompt_tokens": {
+          "cv": 0.059,
+          "max": 525.0,
+          "mean": 469.6667,
+          "min": 445.0,
+          "n": 12,
+          "sd": 27.7172
+        }
+      },
+      "repetitions": {
+        "1": {
+          "graded_attempts": 6,
+          "success_rate": 1.0,
+          "successes": 6
+        },
+        "2": {
+          "graded_attempts": 6,
+          "success_rate": 1.0,
+          "successes": 6
+        }
+      },
+      "success_rate_by_repetition": [
+        1.0,
+        1.0
+      ],
+      "success_rate_sd": 0.0,
+      "success_rate_swing": 0.0
+    },
+    "vector": {
+      "metrics": {
+        "context_tokens": {
+          "cv": 0.0054,
+          "max": 3998.0,
+          "mean": 3964.0,
+          "min": 3942.0,
+          "n": 12,
+          "sd": 21.2945
+        },
+        "input_tokens": {
+          "cv": 0.0277,
+          "max": 3744.0,
+          "mean": 3591.75,
+          "min": 3471.0,
+          "n": 12,
+          "sd": 99.3617
+        },
+        "latency_ms": {
+          "cv": 0.3796,
+          "max": 115210.599,
+          "mean": 69452.1968,
+          "min": 38518.634,
+          "n": 12,
+          "sd": 26364.6709
+        },
+        "output_tokens": {
+          "cv": 0.5407,
+          "max": 3706.0,
+          "mean": 1783.0833,
+          "min": 723.0,
+          "n": 12,
+          "sd": 964.1015
+        },
+        "total_prompt_tokens": {
+          "cv": 0.0272,
+          "max": 3808.0,
+          "mean": 3655.75,
+          "min": 3535.0,
+          "n": 12,
+          "sd": 99.3617
+        }
+      },
+      "repetitions": {
+        "1": {
+          "graded_attempts": 6,
+          "success_rate": 0.8333,
+          "successes": 5
+        },
+        "2": {
+          "graded_attempts": 6,
+          "success_rate": 0.8333,
+          "successes": 5
+        }
+      },
+      "success_rate_by_repetition": [
+        0.8333,
+        0.8333
+      ],
+      "success_rate_sd": 0.0,
+      "success_rate_swing": 0.0
+    }
+  },
+  "between_arm_success_spread": 0.4166,
+  "max_within_arm_success_swing": 0.5,
+  "note": "A success delta is interpretable only when it exceeds the largest within-arm swing. Continuous endpoints (output tokens, latency) carry their own dispersion under arms.<arm>.metrics and should be preferred when this verdict is false or null.",
+  "paired_intervals": {
+    "baseline_arm": "classic",
+    "metrics": {
+      "context_tokens": {
+        "ci95": [
+          -11.25,
+          21.0833
+        ],
+        "excludes_zero": false,
+        "iterations": 4000,
+        "mean_delta": 6.6667,
+        "n_pairs": 12,
+        "seed": 20260822
+      },
+      "input_tokens": {
+        "ci95": [
+          -119.4545,
+          -72.5455
+        ],
+        "excludes_zero": true,
+        "iterations": 4000,
+        "mean_delta": -95.6364,
+        "n_pairs": 11,
+        "seed": 20260822
+      },
+      "latency_ms": {
+        "ci95": [
+          -35420.3825,
+          47653.4624
+        ],
+        "excludes_zero": false,
+        "iterations": 4000,
+        "mean_delta": 3079.6832,
+        "n_pairs": 12,
+        "seed": 20260822
+      },
+      "output_tokens": {
+        "ci95": [
+          -457.3636,
+          409.3636
+        ],
+        "excludes_zero": false,
+        "iterations": 4000,
+        "mean_delta": -34.4545,
+        "n_pairs": 11,
+        "seed": 20260822
+      },
+      "success": {
+        "ci95": [
+          0.0,
+          0.5
+        ],
+        "excludes_zero": false,
+        "iterations": 4000,
+        "mean_delta": 0.25,
+        "n_pairs": 12,
+        "seed": 20260822
+      },
+      "total_prompt_tokens": {
+        "ci95": [
+          -113.25,
+          803.1667
+        ],
+        "excludes_zero": false,
+        "iterations": 4000,
+        "mean_delta": 201.6667,
+        "n_pairs": 12,
+        "seed": 20260822
+      }
+    },
+    "treatment_arm": "graphrag"
+  },
+  "repetitions": 2,
+  "success_deltas_interpretable": false
+}

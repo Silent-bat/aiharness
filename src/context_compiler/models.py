@@ -54,4 +54,7 @@ class CompiledContext:
     estimated_tokens: int
     items: List[ContextItem]
     rendered: str
+    # Why evidence selection stopped: the sufficiency rule's reason and counters,
+    # or the default "candidates_exhausted" when no rule was active.
+    stopping: Dict[str, object] = field(default_factory=dict)
 

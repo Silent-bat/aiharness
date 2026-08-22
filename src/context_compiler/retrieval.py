@@ -1,7 +1,7 @@
 import math
 from collections import deque
 from dataclasses import dataclass
-from typing import Dict, Iterable, List, Optional, Sequence, Set, Tuple
+from typing import Dict, Iterable, List, Mapping, Optional, Sequence, Set, Tuple
 
 from .models import SearchHit
 from .store import GraphStore
@@ -10,7 +10,24 @@ from .vectors import VectorIndex
 
 @dataclass(frozen=True)
 class RetrievalMode:
-    """One ablation arm: which evidence sources contribute to ranking."""
+    """One ablation arm: which evidence sources contribute to ranking.
+
+    `fusion` decides how sources are combined once each has scored:
+
+    - `weighted` sums raw scores. This is the legacy scheme and it is now known
+      to be defective: bm25 relevance, cosine similarity, and graph path decay
+      live on incomparable scales, so a weighted sum is a comparison of units.
+      Three separate results say the same thing -- `graph_only` matches
+      `graphrag` at 6x fewer tokens on the 200k haystack, `lexical_vector_graph`
+      is worse than both arms it contains, and on the 39k haystack adding
+      lexical evidence to the graph arm lowers success -- because decoy lexical
+      hits with large raw scores crowd out traversal results with small ones.
+    - `rrf` discards score magnitudes and fuses ranks instead
+      (`weight / (k + rank)`), so a source can only vote on ordering.
+    - `escalate` runs the graph first and consults lexical or vector evidence
+      only when traversal comes back empty. This treats the other sources as a
+      fallback for entry-point discovery rather than as co-equal evidence.
+    """
 
     name: str
     lexical_weight: float
@@ -19,6 +36,7 @@ class RetrievalMode:
     graph_depth: int
     label: str
     graph_seeds_only: bool = False
+    fusion: str = "weighted"
 
     @property
     def uses_lexical(self) -> bool:
@@ -33,6 +51,14 @@ class RetrievalMode:
         return self.graph_weight > 0 and self.graph_depth > 0
 
 
+# Reciprocal-rank-fusion constant. 60 is the value from the original TREC work;
+# it is large enough that the top few ranks are not winner-take-all, which is the
+# behaviour that lets one confident decoy dominate a weighted sum.
+RRF_K = 60
+
+FUSIONS = ("weighted", "rrf", "escalate")
+
+
 RETRIEVAL_MODES: Dict[str, RetrievalMode] = {
     # Lexical BM25 only. This is the "classic CLI" baseline.
     "lexical": RetrievalMode("lexical", 1.0, 0.0, 0.0, 0, "lexical bm25 only"),
@@ -44,15 +70,46 @@ RETRIEVAL_MODES: Dict[str, RetrievalMode] = {
         graph_seeds_only=True,
     ),
     "lexical_graph": RetrievalMode(
-        "lexical_graph", 0.62, 0.0, 0.38, 2, "lexical + graph traversal"
+        "lexical_graph", 0.62, 0.0, 0.38, 2, "lexical + graph traversal (weighted sum, legacy)"
     ),
     "lexical_vector": RetrievalMode(
         "lexical_vector", 0.6, 0.4, 0.0, 0, "lexical + vector"
     ),
     "lexical_vector_graph": RetrievalMode(
-        "lexical_vector_graph", 0.45, 0.25, 0.30, 2, "lexical + vector + graph traversal"
+        "lexical_vector_graph", 0.45, 0.25, 0.30, 2,
+        "lexical + vector + graph traversal (weighted sum, legacy)"
+    ),
+    # Rank-normalized replacements for the two weighted hybrids above. Same
+    # sources, same weights, but the weights apply to reciprocal ranks rather
+    # than to raw scores, so no source can win on scale alone.
+    "lexical_graph_rrf": RetrievalMode(
+        "lexical_graph_rrf", 0.62, 0.0, 0.38, 2,
+        "lexical + graph, reciprocal-rank fusion", fusion="rrf",
+    ),
+    "lexical_vector_graph_rrf": RetrievalMode(
+        "lexical_vector_graph_rrf", 0.45, 0.25, 0.30, 2,
+        "lexical + vector + graph, reciprocal-rank fusion", fusion="rrf",
+    ),
+    # Conditional escalation: graph traversal decides, and lexical evidence is
+    # admitted only when the frontier is empty. This is the arm that follows from
+    # `graph_only` beating every hybrid on the large haystacks while still
+    # needing lexical seeds to find an entry point at all.
+    "graph_escalate": RetrievalMode(
+        "graph_escalate", 1.0, 0.0, 1.0, 2,
+        "graph traversal, escalating to lexical only on an empty frontier",
+        fusion="escalate",
+    ),
+    "graph_escalate_vector": RetrievalMode(
+        "graph_escalate_vector", 1.0, 0.6, 1.0, 2,
+        "graph traversal, escalating to lexical + vector on an empty frontier",
+        fusion="escalate",
     ),
 }
+
+# What a caller should use when it has no reason to prefer another arm. The
+# weighted hybrids are retained as ablation baselines, not as recommendations.
+RECOMMENDED_MODE = "graph_escalate"
+LEGACY_WEIGHTED_MODES = ("lexical_graph", "lexical_vector_graph")
 
 
 TASK_KEYWORDS = {
@@ -195,6 +252,7 @@ class HybridRetriever:
                 return RetrievalMode(
                     base.name, base.lexical_weight, base.vector_weight,
                     base.graph_weight, graph_depth, base.label, base.graph_seeds_only,
+                    base.fusion,
                 )
             return base
         if graph_depth <= 0:
@@ -203,6 +261,7 @@ class HybridRetriever:
         return RetrievalMode(
             legacy.name, legacy.lexical_weight, legacy.vector_weight,
             legacy.graph_weight, graph_depth, legacy.label, legacy.graph_seeds_only,
+            legacy.fusion,
         )
 
     def retrieve(
@@ -272,17 +331,14 @@ class HybridRetriever:
             # Graph-only arm: keep nodes reached by traversal, drop pure lexical seeds.
             hits = {key: hit for key, hit in hits.items() if hit.graph_score > 0}
 
+        if active.fusion == "escalate":
+            hits = self._escalate(hits, active)
+
         query_words = set(_words(query))
-        weight_total = (
-            active.lexical_weight + active.vector_weight + active.graph_weight
-        ) or 1.0
+        evidence_scores = self._fuse(hits, active)
         for hit in hits.values():
             hit.task_score = self._task_affinity(hit, task, query_words)
-            evidence = (
-                active.lexical_weight * hit.lexical_score
-                + active.vector_weight * hit.vector_score
-                + active.graph_weight * hit.graph_score
-            ) / weight_total
+            evidence = evidence_scores[hit.node.key]
             hit.final_score = 0.9 * evidence + 0.10 * hit.task_score
             if hit.node.kind == "file":
                 hit.final_score *= 0.72
@@ -295,6 +351,90 @@ class HybridRetriever:
             hits.values(),
             key=lambda hit: (-hit.final_score, hit.node.path, hit.node.start_line),
         )[:result_limit]
+
+    @staticmethod
+    def _escalate(hits: Dict[str, SearchHit],
+                  active: RetrievalMode) -> Dict[str, SearchHit]:
+        """Graph first; other sources only when traversal reached nothing.
+
+        The premise is that lexical and vector search are good at finding an
+        entry point and bad at deciding what else matters, while traversal is the
+        reverse. Escalation keeps them in their competent roles instead of adding
+        their scores together: if the frontier is non-empty the graph decides
+        alone, and if it is empty the arm degrades to the lexical baseline rather
+        than returning nothing.
+        """
+        reached = {key: hit for key, hit in hits.items() if hit.graph_score > 0}
+        if reached:
+            for hit in reached.values():
+                hit.reasons.append("escalation: graph frontier was non-empty, "
+                                   "so lexical evidence was not admitted")
+            return reached
+        for hit in hits.values():
+            hit.reasons.append("escalation: graph frontier was empty, "
+                               "falling back to lexical evidence")
+        return hits
+
+    def _fuse(self, hits: Mapping[str, SearchHit],
+              active: RetrievalMode) -> Dict[str, float]:
+        """Combine per-source scores into one evidence score per hit."""
+        if active.fusion == "rrf":
+            return self._reciprocal_rank_fusion(hits, active)
+        if active.fusion == "escalate":
+            # After `_escalate` only one source is in play, so the weights would
+            # divide out anyway; scoring on whichever source survived keeps the
+            # ordering that source produced.
+            graph_present = any(hit.graph_score > 0 for hit in hits.values())
+            return {
+                key: (hit.graph_score if graph_present
+                      else max(hit.lexical_score, hit.vector_score))
+                for key, hit in hits.items()
+            }
+        weight_total = (
+            active.lexical_weight + active.vector_weight + active.graph_weight
+        ) or 1.0
+        return {
+            key: (active.lexical_weight * hit.lexical_score
+                  + active.vector_weight * hit.vector_score
+                  + active.graph_weight * hit.graph_score) / weight_total
+            for key, hit in hits.items()
+        }
+
+    @staticmethod
+    def _reciprocal_rank_fusion(hits: Mapping[str, SearchHit],
+                                active: RetrievalMode) -> Dict[str, float]:
+        """Fuse ranks, not scores, so incomparable scales cannot dominate.
+
+        Each source ranks the candidates it scored and contributes
+        `weight / (RRF_K + rank)`. A source that scored a hit at zero did not
+        retrieve it and contributes nothing, which is the difference that matters:
+        under a weighted sum a hit with one enormous bm25 score outranks a hit
+        that two sources agree on, and under RRF it does not. The result is
+        renormalized to the unit interval so downstream multipliers (file
+        penalty, test bonus) keep the magnitudes they were tuned against.
+        """
+        sources = (
+            ("lexical_score", active.lexical_weight),
+            ("vector_score", active.vector_weight),
+            ("graph_score", active.graph_weight),
+        )
+        fused: Dict[str, float] = {key: 0.0 for key in hits}
+        for attribute, weight in sources:
+            if weight <= 0:
+                continue
+            scored = [(key, getattr(hit, attribute)) for key, hit in hits.items()
+                      if getattr(hit, attribute) > 0]
+            ordered = sorted(
+                scored,
+                key=lambda pair: (-pair[1], hits[pair[0]].node.path,
+                                  hits[pair[0]].node.start_line),
+            )
+            for rank, (key, _score) in enumerate(ordered, start=1):
+                fused[key] += weight / (RRF_K + rank)
+        largest = max(fused.values(), default=0.0)
+        if largest <= 0:
+            return fused
+        return {key: value / largest for key, value in fused.items()}
 
     def _expand_graph(
         self, seeds: Sequence[str], task: str, max_depth: int

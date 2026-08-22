@@ -545,6 +545,175 @@ A third caveat applies to both runs: the fixtures are cross-file by construction
 which is the regime the graph is built for. Real single-file fixes, where lexical
 search suffices, are absent by selection.
 
+### Pooled variance across the two live runs
+
+Treating the two runs as repetitions 1 and 2 of the same design
+(`python3 -m evaluation.variance <results.json>`):
+
+| arm | success by rep | swing | output tokens | latency ms |
+| --- | --- | --- | --- | --- |
+| classic | 0.50 / 1.00 | 0.50 | 1574 +- 1089 | 66507 +- 53946 |
+| full_file | 0.50 / 0.67 | 0.17 | 1489 +- 1249 | 64845 +- 49742 |
+| graph_only | 1.00 / 1.00 | 0.00 | 577 +- 389 | 29183 +- 12752 |
+| graphrag | 1.00 / 1.00 | 0.00 | 1545 +- 682 | 69586 +- 48224 |
+| lexical_vector | 0.83 / 0.67 | 0.17 | 1772 +- 1394 | 81385 +- 76611 |
+| lexical_vector_graph | 0.83 / 0.83 | 0.00 | 1312 +- 779 | 64377 +- 48116 |
+| oracle | 1.00 / 1.00 | 0.00 | 342 +- 153 | 32866 +- 44216 |
+| vector | 0.83 / 0.83 | 0.00 | 1783 +- 964 | 69452 +- 26365 |
+
+Maximum within-arm success swing is 0.50 against a between-arm spread of 0.42, so
+**no success delta in either run is interpretable.** The paired bootstrap on the
+co-primary endpoints is more informative, and it relocates the effect:
+
+| contrast | output tokens | latency | excludes zero |
+| --- | --- | --- | --- |
+| graphrag - classic | -34 | +3,080 ms | no (both straddle zero) |
+| graph_only - classic | **-983 [-1734, -434]** | **-37,324 ms [-66,872, -10,158]** | yes |
+| oracle - classic | -1,224 | -33,640 ms | yes |
+
+**The ~2.8x output-token effect belongs to `graph_only`, not to the nominal
+treatment arm.** `graphrag` -- lexical and graph mixed by weighted sum -- shows no
+output-token effect at all. That is a third independent result pointing at the
+fusion, and it is what motivated the two changes below.
+
+## Fusion: rank normalization fails, conditional escalation works
+
+The weighted sum adds bm25 relevance, cosine similarity, and graph path decay --
+three incomparable units. bm25 is unbounded, so a single high-scoring lexical decoy
+outranks a symbol that both other sources agreed on (`tests/test_fusion.py`
+pins this directly). Two replacements were implemented:
+
+- `rrf`: reciprocal rank fusion, `weight / (60 + rank)` per source, so only
+  ordering survives and magnitude cannot vote. Modes `lexical_graph_rrf`,
+  `lexical_vector_graph_rrf`.
+- `escalate`: the graph decides whenever its frontier is non-empty; lexical and
+  vector evidence is admitted only when traversal returns nothing. Modes
+  `graph_escalate` (now `RECOMMENDED_MODE`), `graph_escalate_vector`.
+
+Mock, 39k-token haystack, 4,000-token budget, `--max-items 200`:
+
+| arm | solved | context tokens | items |
+| --- | --- | --- | --- |
+| classic | 1/6 | 3974 | 54 |
+| graphrag (weighted) | 5/6 | 3980 | 45 |
+| graphrag_rrf | 3/6 | 3979 | 44 |
+| lexical_vector_graph (weighted) | 1/6 | 3980 | 38 |
+| lexical_vector_graph_rrf | 1/6 | 3975 | 38 |
+| graph_escalate | **6/6** | 3978 | 34 |
+| graph_escalate_vector | **6/6** | 3970 | 32 |
+| graph_only | 6/6 | 3975 | 45 |
+| oracle | 6/6 | 379 | 3 |
+
+**RRF is not the fix.** It made `graphrag` worse (5/6 -> 3/6) and left
+`lexical_vector_graph` at 1/6. Rank normalization removes the unit mismatch but
+keeps the premise that lexical votes are worth counting; on a haystack where
+distractors share vocabulary with the target, they are not. Escalation, which
+discards them outright when the graph has an answer, matched `graph_only` at 6/6
+with fewer items, and unlike `graph_only` it degrades to lexical search instead of
+returning nothing when traversal comes back empty. The weighted modes remain in
+the registry as ablation baselines only.
+
+Primary endpoint on the same corpus, swept over 256-8,000 tokens:
+
+```
+PRIMARY: budget to reach 100% success (oracle = floor, full_file = ceiling)
+arm                        budget       x oracle
+graph_escalate                512           1.00
+graph_only                    512           1.00
+oracle                        512           1.00
+graphrag                     8000          15.62
+graphrag_rrf                 8000          15.62
+never reached the target: full_file, classic
+```
+
+## Stopping at sufficiency instead of at the budget
+
+Every arm except `oracle` and `graph_only` filled whatever budget it was handed,
+which is why raising the budget raised cost without raising success: the ranked
+tail was padding. `graph_only` was the exception by accident -- graph traversal has
+a bounded frontier, so it self-limited to ~191 items even when allowed 4,000.
+`ContextCompiler`'s `StoppingRule` makes that property explicit and available to
+every arm. Three independent conditions, any of which stops packing:
+
+- **closure** -- every outbound `resolved_calls` / `resolved_imports` /
+  `resolved_inherits` reference made by the selected evidence points at something
+  also selected. Nothing further is needed to read what is already there.
+- **score_cliff** -- the next candidate scores below 15% of the best one.
+- **no_new_information** -- four consecutive candidates added no new file and
+  closed no outstanding reference.
+
+It is off by default (`--stopping` to enable) because it changes what every arm
+packs: it is a manipulated variable, not a silent improvement. Mock, 39k haystack,
+4,000-token budget:
+
+| arm | off | on | mean unused budget | conditions fired |
+| --- | --- | --- | --- | --- |
+| classic | 1/6 at 3974t / 54 items | 0/6 at 1490t / 14 items | 2509 | flat tail 6/6 |
+| graphrag | 5/6 at 3980t / 45 items | 1/6 at 1739t / 16 items | 2262 | flat tail 6/6 |
+| graph_only | 6/6 at 3975t / 45 items | **6/6 at 853t / 7 items** | 3147 | closure 4, flat tail 2 |
+| graph_escalate | 6/6 at 3978t / 34 items | **6/6 at 986t / 7 items** | 3014 | closure 4, flat tail 2 |
+| oracle | 6/6 at 379t / 3 items | 6/6 at 379t / 3 items | 3620 | not applicable |
+
+For the graph arms this is the largest single improvement in the project: a 4.7x
+context reduction at unchanged success, closing the gap to the oracle floor from
+10.5x to 2.2x. Most stops are reference closure, not the score cliff -- the rule
+is deciding on structure, not on a score threshold.
+
+**It destroys the lexically-fused arms, and that is the informative half.**
+`graphrag` drops 5/6 -> 1/6, so its 5/6 came from filling the budget rather than
+from ranking: the evidence it needed was deep in the tail. Raising patience does
+not rescue it -- at `--stopping-patience 16` it still solves 1/6 while spending
+2701 tokens. A sufficiency rule can only truncate a ranking that is already
+trustworthy, which is a stronger version of the same conclusion the fusion work
+reached. `oracle` and `full_file` are exempt by construction, since trimming
+either would change what the floor and ceiling mean.
+
+Caveat: mock client, so this measures evidence survival per token, not model
+competence. The live stopping comparison has not been run.
+
+## Real repositories: SWE-bench Lite, pre-registered
+
+Every number above comes from generated repositories whose distractors were planted
+by the same generator. The graph arms' advantage may be an advantage over *that*
+distractor distribution rather than over real code, so this is the external-validity
+gate: `evaluation/swebench.py` turns SWE-bench Lite instances into cases in this
+harness's schema, and `evaluation/PREREGISTRATION.md` fixes the endpoints, arms,
+strata, and exclusion rules before the first live call.
+
+Three constraints the loader enforces, each of which a naive loader gets wrong:
+
+- **Test names are withheld.** SWE-bench problem statements frequently name the
+  failing test, and a test file names the symbol under test — so an unredacted
+  prompt turns the task into a lookup and hands the lexical arm the answer. The
+  loader strips pytest node ids, `test_*` / `*_test` / `Test*` identifiers, and
+  paths into test trees, then *re-checks* the result against the instance's
+  `FAIL_TO_PASS` tokens and refuses to emit a case that still leaks one. The
+  `test_patch` is applied to disk, because the withheld tests must exist to be run,
+  but never enters the context; grading runs only the withheld node ids.
+- **Stratified by gold-patch file count** into `single_file`, `two_file`, and
+  `multi_file`, excluding test files and `conftest.py` from the count. A one-file
+  fix is the regime where lexical search suffices and the graph cannot help; pooling
+  the strata would let the sample's mix decide the result. The pre-registered
+  interaction hypothesis is that the advantage grows with file count — a *uniform*
+  advantage across strata would be evidence that the generator, not the structure,
+  produced the earlier effect.
+- **Pre-registered and reproducible.** `plan` reports the dataset SHA-256, the
+  seeded sample (seed 20260822), the per-stratum population and draw, and the leak
+  check, with no cloning, so the sample can be registered before it is run.
+
+```bash
+# inspect and register the sample first (no network, no cloning)
+python3 -m evaluation.swebench plan --dataset swebench_lite.json --per-stratum 10
+
+# then clone each instance at its base commit and emit the case file
+python3 -m evaluation.swebench prepare --dataset swebench_lite.json \
+    --workspaces evaluation/swebench_repos --per-stratum 10 \
+    --output evaluation/swebench_cases.json
+```
+
+No mock arm is used here: mock grading against a real repository would only restate
+the oracle labels back to themselves. **Not yet run.**
+
 ## Turn economics: what a terminal agent actually pays
 
 Every result above scores a *one-shot* context window. A terminal agent does not
@@ -702,20 +871,31 @@ So the honest revised claim is narrower and testable:
 > size, than lexical or vector retrieval — while binary success at a single budget
 > is dominated by run-to-run variance on task sets of this size.
 
-What that requires, in order:
+What that requires, in order, with current status:
 
-1. **Variance first.** No arm comparison is admissible without `--repetitions` and a
-   within-arm interval. One arm's swing currently exceeds the effect being chased.
-2. **Switch the primary endpoint** from success-at-fixed-budget to
-   budget-at-fixed-success (`budget_sweep.py::_tokens_to_reach`), with `oracle` as
-   the information floor and `full_file` as the ceiling.
-3. **Promote output tokens and latency to co-primary**, since they reproduced.
-4. **Replace weighted-sum fusion** with rank-normalized fusion or conditional
-   escalation (graph first; lexical only on an empty frontier).
-5. **Build an explicit sufficiency stopping rule**, generalizing the bounded graph
-   frontier that lets `graph_only` self-limit to ~191 items under a 4,000-item cap.
+1. **Variance first.** *Done, and it is the gate.* `evaluation/variance.py` reports
+   within-arm swing, within-task dispersion, and paired bootstrap intervals. Pooling
+   the two live runs gives a maximum within-arm success swing of 0.50 against a
+   between-arm spread of 0.42, so no success delta in this project is currently
+   interpretable. A live `--repetitions 5` run is in progress.
+2. **Switch the primary endpoint** to budget-at-100%-success. *Done in
+   `budget_sweep.py`*, which now prints a PRIMARY block with each arm's budget and
+   its ratio to the `oracle` floor and `full_file` ceiling, and refuses to let a
+   single-repetition table be read as a result. Measured on mock; not yet live.
+3. **Promote output tokens and latency to co-primary.** *Done*, and it relocated the
+   effect: the reproducible ~2.8x belongs to `graph_only`, not to `graphrag`.
+4. **Replace weighted-sum fusion.** *Done, and one of the two candidates failed.*
+   RRF made `graphrag` worse; conditional escalation reached 6/6 and is now the
+   recommended mode. The weighted hybrids are demoted to ablation baselines.
+5. **Build an explicit sufficiency stopping rule.** *Done.* Reference closure, score
+   cliff, and flat-tail patience, off by default. It cuts the graph arms 4.7x at
+   unchanged success and collapses the lexically-fused arms, which is itself evidence
+   that their success came from budget filling rather than from ranking.
 6. **Replicate on real repositories** — SWE-bench Lite with test names withheld,
-   stratified by gold-patch file count, pre-registered.
+   stratified by gold-patch file count, pre-registered. *Not started.* This is the
+   gate on external validity: if the graph arms' advantage comes from generated
+   distractors sharing vocabulary in a way real code does not, everything above
+   collapses.
 
 The implementation is structured so that each retrieval component can be disabled or
 replaced for controlled experiments; the `oracle` arm is the most useful diagnostic
