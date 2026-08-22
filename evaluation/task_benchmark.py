@@ -24,7 +24,7 @@ from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence
 from context_compiler.compiler import StoppingRule, estimate_tokens
 from context_compiler.retrieval import RETRIEVAL_MODES
 from context_compiler.providers import (ChatResponse, ModelClient, ProviderConfig,
-                                        Usage, load_env_file)
+                                        ProviderError, Usage, load_env_file)
 from context_compiler.service import ContextService
 
 from evaluation.variance import variance_report
@@ -323,11 +323,27 @@ def run_task(task: Mapping[str, Any], arm: str, *, provider: Optional[ModelClien
             # billed 82 uncached input tokens against `classic`'s 3,524 purely
             # because it ran second. A per-call nonce denies every arm that subsidy.
             system = "cache-bust: {}\n{}".format(uuid.uuid4(), system)
-        response = client.complete([{"role": "user", "content": instruction}], system=system, max_tokens=max_tokens)
+        transport_error = None
+        try:
+            response = client.complete([{"role": "user", "content": instruction}],
+                                       system=system, max_tokens=max_tokens)
+        except ProviderError as exc:
+            # Retries are already exhausted by here, so the call is not coming back.
+            # A provider that stops answering is the same class of event as one that
+            # answers with nothing: it grades neither way, so it is a void trial and
+            # not a loss for whichever arm was unlucky enough to be in flight. This
+            # also keeps one dead socket from discarding every other call in the run,
+            # which is how the first live budget sweep was lost.
+            transport_error = str(exc)
+            response = ChatResponse(text="", model=None)
         error = None
         changed = 0
         exit_code: Optional[int] = None
         try:
+            if transport_error is not None:
+                # Nothing to apply and nothing to grade; running the suite here would
+                # only record the fixture's own pre-existing failure as this arm's.
+                raise RuntimeError(transport_error)
             changed = _apply_files(root, _response_files(response.text)["files"])
             command = task.get("test_command", "python3 -m unittest discover -s tests -v")
             completed = subprocess.run(command, cwd=str(root), shell=True, text=True, capture_output=True, timeout=float(task.get("test_timeout_seconds", 120)))
@@ -342,7 +358,7 @@ def run_task(task: Mapping[str, Any], arm: str, *, provider: Optional[ModelClien
         # No content at all means nothing was measured: an empty completion cannot
         # be graded for coding ability, and treating it as a wrong answer credits the
         # other arms for a provider hiccup.
-        void = not str(response.text or "").strip()
+        void = transport_error is not None or not str(response.text or "").strip()
         return RunResult(task_id=str(task["id"]), arm=arm, repetition=repetition, success=error is None and exit_code == 0,
                          test_exit_code=exit_code, changed_files=changed,
                          context_tokens=int(compiled["estimated_tokens"]),
@@ -358,7 +374,7 @@ def run_task(task: Mapping[str, Any], arm: str, *, provider: Optional[ModelClien
                          tokens_left_unused=(compiled.get("stopping") or {}).get("tokens_left_unused"),
                          open_references=(compiled.get("stopping") or {}).get("open_references"),
                          void=void,
-                         error=error)
+                         error=transport_error or error)
 
 
 def benchmark(tasks: Iterable[Mapping[str, Any]], *, mock: bool, token_budget: int,
@@ -368,13 +384,17 @@ def benchmark(tasks: Iterable[Mapping[str, Any]], *, mock: bool, token_budget: i
               baseline_arm: str = "classic", treatment_arm: str = "graphrag",
               force_token_budget: bool = False, cache_bust: bool = True,
               max_items: Optional[int] = None,
-              stopping: Optional[StoppingRule] = None) -> Dict[str, Any]:
+              stopping: Optional[StoppingRule] = None,
+              provider: Optional[Any] = None) -> Dict[str, Any]:
     tasks = list(tasks)
     arms = list(dict.fromkeys(arms))
     unknown = [arm for arm in arms if arm not in ARMS]
     if unknown:
         raise ValueError("unknown arms: {}".format(", ".join(unknown)))
-    provider = None if (mock or codex_cli) else ModelClient(ProviderConfig.from_env())
+    # Injectable so a test can supply a failing provider; a live run leaves it
+    # unset and the credential is read from the environment as before.
+    if provider is None and not (mock or codex_cli):
+        provider = ModelClient(ProviderConfig.from_env())
     results = []
     for task in tasks:
         for arm in arms:

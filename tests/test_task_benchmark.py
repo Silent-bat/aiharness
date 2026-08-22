@@ -22,6 +22,16 @@ class _EmptyResponseClient:
         return ChatResponse(text="")
 
 
+class _TimingOutClient:
+    """A provider whose retries are already spent: the call is not coming back."""
+
+    def complete(self, messages, *, system=None, max_tokens=None, temperature=None):
+        from context_compiler.providers import ProviderError
+
+        raise ProviderError("model request failed: The read operation timed out",
+                            transient=True)
+
+
 class VoidTrialTest(unittest.TestCase):
     """An empty completion is a harness failure and must not be graded as a loss."""
 
@@ -38,6 +48,39 @@ class VoidTrialTest(unittest.TestCase):
         # did not earn: in the first live 8-arm run this cost `classic` one of its
         # three recorded failures.
         self.assertEqual(result.changed_files, 0)
+
+
+class ExhaustedProviderTest(unittest.TestCase):
+    """A provider that stops answering must void the trial, not end the run.
+
+    The first live budget sweep was destroyed twice by one read timeout: retries
+    now absorb the transient case, but a call whose retries are exhausted still
+    propagated out through benchmark() and discarded every other call already
+    paid for. It grades neither way, so it is the same class of event as an empty
+    completion.
+    """
+
+    FIXTURE = Path(__file__).parents[1] / "evaluation" / "fixtures" / "empty_cart_bug"
+    TASK = {"id": "empty-cart", "repository": str(FIXTURE),
+            "prompt": "reject an empty cart", "required_symbols": ["submit_order"]}
+
+    def test_an_exhausted_provider_is_a_void_trial(self):
+        result = run_task(dict(self.TASK), "classic", provider=_TimingOutClient(),
+                          mock=False, codex_cli=False, token_budget=2000,
+                          max_tokens=None, input_rate=None, output_rate=None)
+        self.assertTrue(result.void)
+        self.assertFalse(result.success)
+        self.assertEqual(result.changed_files, 0)
+        # The cause is kept, so a run can report how many trials the provider ate
+        # rather than silently shrinking the denominator.
+        self.assertIn("read operation timed out", result.error)
+
+    def test_the_run_survives_and_the_void_leaves_the_denominator(self):
+        report = benchmark([dict(self.TASK)], mock=False, token_budget=2000,
+                           max_tokens=None, input_rate=None, output_rate=None,
+                           arms=["classic"], provider=_TimingOutClient())
+        self.assertEqual(report["classic"]["voids"], 1)
+        self.assertEqual(report["classic"]["graded_attempts"], 0)
 
 
 class TaskBenchmarkTest(unittest.TestCase):
