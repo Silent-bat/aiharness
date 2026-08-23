@@ -774,6 +774,79 @@ sent and becomes a ceiling the arm declines to spend.
 Caveat: mock client, so this measures evidence survival per token, not model
 competence. The live stopping comparison has not been run.
 
+## The primary endpoint, measured live: budget to reach full success
+
+Everything above compares success at one budget, which two live runs showed is
+dominated by noise. This is the endpoint the program was reorganized around --
+the budget an arm needs to reach 100% success, live, bracketed by `oracle` as the
+information floor and `full_file` as the ceiling. Three runs, same six haystack
+tasks, two repetitions, `--max-items 200`, merged into
+`evaluation/results/live_budget_sweep_combined.json`:
+
+```
+  budget        classic       graphrag     graph_only         oracle      full_file
+     128              -              -      0/12 @126      7/12 @110      3/12 @102
+     200              -              -      6/12 @168      7/12 @180      5/12 @172
+     320              -              -     12/12 @281     11/12 @290      7/12 @288
+     512      9/12 @498     11/12 @492     12/12 @489     12/12 @379      6/12 @490
+    1024     11/12 @994    10/12 @1011     12/12 @1000    11/12 @379              -
+    2048     8/12 @2016    10/12 @2031     12/12 @2034    12/12 @379              -
+    4000    10/12 @3974    12/12 @3980     12/12 @3975    11/12 @379              -
+   48000              -              -              -     11/12 @380   10/12 @45466
+
+arm            budget to 100%    x oracle floor
+graph_only                320              0.62
+oracle                    512              1.00
+graphrag                 4000              7.81
+classic             unreached                 -
+full_file           unreached                 -
+```
+
+A blank cell is unmeasured, not a failure: the low bracket exists to locate the
+crossing point and the 48,000 point exists only to give `full_file` a budget the
+45k-token repository actually fits.
+
+**`graph_only` is the only arm that ever reaches 100%, and it does so on 281
+tokens of context.** `full_file`, handed the entire repository at 45,466 tokens
+across 125 files, scores 10/12 -- so the arm meant to be the ceiling is beaten by
+1/162nd of its own context. That is the first live evidence in this repository for
+context rot as opposed to context sufficiency: the required evidence is
+unambiguously present in `full_file`'s prompt, and the model still fails two
+trials that 281 tokens of graph-selected evidence solves. `oracle` at 11/12 on the
+same run repeats the r5 finding that the human-labeled floor is a token-efficiency
+floor, not a success ceiling.
+
+### What this endpoint does not fix
+
+The bracket framing does not survive its own measurement. Neither the floor nor
+the ceiling reaches the target, so `ratio_to_full_file_ceiling` is null for every
+arm and there is no upper bracket to divide by. The ratio to the floor is below
+one (0.62), which the framing did not anticipate.
+
+The endpoint is also still a first-crossing statistic over noisy per-point
+success, and it inherits that noise. `graph_only` reads 12/12 at 320, 11/12 at
+512, then 12/12 at every larger budget; `oracle` reads 11/12 at 320 and 12/12 at
+512. The 320-versus-512 gap between those two arms is one trial, and is not
+defensible. What survives is the ordering against the retrieval baselines -- 320
+against `graphrag`'s 4,000 and `classic`'s never -- a spread no single trial can
+produce. Read this endpoint as an order-of-magnitude bracket, not a measurement
+to two significant figures, and note that the reported crossing is a lower bound
+whenever an arm reaches the target at the smallest swept budget.
+
+Co-primary at the 4,000-token budget, where every retrieval arm was measured:
+
+```
+arm                         output tokens         latency ms
+graphrag                       2011+-1030       64647+-34025
+classic                        1076+-660        56784+-45313
+graph_only                       683+-435       30201+-18684
+oracle                           360+-274       21692+-16698
+```
+
+`graphrag`'s output tokens *rise* with the budget (842 at 512 to 2,011 at 4,000)
+while `graph_only`'s stay flat, which is the padding signature the stopping rule
+was built to remove.
+
 ## Real repositories: SWE-bench Lite, pre-registered
 
 Every number above comes from generated repositories whose distractors were planted
@@ -958,6 +1031,11 @@ claim still holds, and the iso-token half holds (uncached input was lower for
 
 Two findings did survive everything:
 
+- **Full context is not a success ceiling.** Given the whole 45,466-token
+  repository across 125 files, `full_file` scored 10/12 on tasks `graph_only`
+  solved 12/12 from 281 tokens. The evidence was present and the model still
+  failed, which is context rot rather than context insufficiency, and it is the
+  one result here that no mock run could have produced.
 - **Output cost tracks context precision.** `graph_only` emitted ~2.8x fewer output
   tokens than `classic` at identical context size, in both live runs, and `oracle`
   fewer still. This is a continuous endpoint that reproduced where binary success
@@ -988,9 +1066,14 @@ What that requires, in order, with current status:
    ratio to the `oracle` floor and `full_file` ceiling, refuses to let a
    single-repetition table read as a result, and flags when a stopping rule has made
    the budget column a ceiling rather than a description. Measured on mock in both
-   the 39k and 200k regimes; **the live sweep has not been run**, and one caveat now
-   attaches to the floor itself: `oracle` scored 27/30 live, so ratio-to-oracle is a
-   token-efficiency bound, not a proof of sufficiency.
+   the 39k and 200k regimes and **now run live** across 128-48,000 tokens: only
+   `graph_only` reaches 100%, at 281 tokens of context, while `full_file` scores
+   10/12 on the entire 45k-token repository. The bracket the step was designed
+   around did not hold -- neither the floor nor the ceiling reaches the target, so
+   there is no ceiling ratio, and the floor ratio came out below one at 0.62.
+   Treat the endpoint as an order-of-magnitude bracket: it is a first-crossing
+   statistic over per-point success, so it inherits that noise, and it is a lower
+   bound whenever an arm passes at the smallest swept budget.
 3. **Promote output tokens and latency to co-primary.** *Done*, and it relocated the
    effect: the reproducible ~2.8x belongs to `graph_only`, not to `graphrag`.
 4. **Replace weighted-sum fusion.** *Done, and one of the two candidates failed.*

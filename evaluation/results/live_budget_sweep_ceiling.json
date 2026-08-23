@@ -1,0 +1,108 @@
+{
+  "arms": [
+    "full_file",
+    "oracle"
+  ],
+  "budgets": [
+    48000
+  ],
+  "co_primary_endpoints": {
+    "arms": {
+      "full_file": {
+        "latency_ms_sd": 36359.3799,
+        "mean_latency_ms": 70038.15,
+        "mean_output_tokens": 708.33,
+        "output_tokens_sd": 967.4157,
+        "success_rate": 0.8333333333333334
+      },
+      "oracle": {
+        "latency_ms_sd": 15170.4381,
+        "mean_latency_ms": 30181.9,
+        "mean_output_tokens": 382.67,
+        "output_tokens_sd": 237.2066,
+        "success_rate": 0.9166666666666666
+      }
+    },
+    "measured_at_token_budget": 48000,
+    "note": "output tokens track context precision and reproduced across two live runs; success at this budget did not"
+  },
+  "max_items": 200,
+  "note": "mock runs measure whether required evidence survives the budget, not model competence",
+  "points": [
+    {
+      "arms": {
+        "full_file": {
+          "attempts": 12,
+          "latency_ms_sd": 36359.3799,
+          "mean_context_items": 125.0,
+          "mean_context_tokens": 45465.83,
+          "mean_latency_ms": 70038.15,
+          "mean_output_tokens": 708.33,
+          "mean_tokens_left_unused": 2538.0,
+          "output_tokens_sd": 967.4157,
+          "stop_reasons": {
+            "candidates_exhausted": 12
+          },
+          "success_rate": 0.8333333333333334,
+          "success_rate_swing": 0.3333,
+          "successes": 10
+        },
+        "oracle": {
+          "attempts": 12,
+          "latency_ms_sd": 15170.4381,
+          "mean_context_items": 3.0,
+          "mean_context_tokens": 379.5,
+          "mean_latency_ms": 30181.9,
+          "mean_output_tokens": 382.67,
+          "mean_tokens_left_unused": 47620.33,
+          "output_tokens_sd": 237.2066,
+          "stop_reasons": {
+            "candidates_exhausted": 12
+          },
+          "success_rate": 0.9166666666666666,
+          "success_rate_swing": 0.1667,
+          "successes": 11
+        }
+      },
+      "token_budget": 48000,
+      "variance": false
+    }
+  ],
+  "primary_endpoint": {
+    "arms": {
+      "full_file": {
+        "budget_to_reach_target": null,
+        "ratio_to_full_file_ceiling": null,
+        "ratio_to_oracle_floor": null,
+        "reached_target": false
+      },
+      "oracle": {
+        "budget_to_reach_target": null,
+        "ratio_to_full_file_ceiling": null,
+        "ratio_to_oracle_floor": null,
+        "reached_target": false
+      }
+    },
+    "ceiling_arm": null,
+    "floor_arm": null,
+    "metric": "smallest swept token budget at which the arm reaches the target",
+    "note": "success rate is a precondition, not the contrast: an arm that never reaches the target has no budget to compare, and one that does is compared on tokens, not on wins",
+    "target_success_rate": 1.0,
+    "unreached_arms": [
+      "full_file",
+      "oracle"
+    ]
+  },
+  "repetitions": 2,
+  "stopping_rule": null,
+  "tokens_to_reach": {
+    "full_file": {
+      "budget_for_success_rate_0.5": 48000,
+      "budget_for_success_rate_1": null
+    },
+    "oracle": {
+      "budget_for_success_rate_0.5": 48000,
+      "budget_for_success_rate_1": null
+    }
+  }
+}
