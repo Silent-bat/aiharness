@@ -1,0 +1,404 @@
+{
+  "arms": [
+    "classic",
+    "graphrag",
+    "graph_only",
+    "oracle"
+  ],
+  "assembled_from": [
+    "live_budget_sweep_r2_partial_512_2048.json (512, 1024, 2048)",
+    "live_budget_sweep_r2_4000.json (4000, rerun after a provider timeout)"
+  ],
+  "budgets": [
+    512,
+    1024,
+    2048,
+    4000
+  ],
+  "co_primary_endpoints": {
+    "arms": {
+      "classic": {
+        "latency_ms_sd": 45312.64,
+        "mean_latency_ms": 56784.13,
+        "mean_output_tokens": 1076.5,
+        "output_tokens_sd": 660.1571,
+        "success_rate": 0.8333333333333334
+      },
+      "graph_only": {
+        "latency_ms_sd": 18683.7398,
+        "mean_latency_ms": 30201.28,
+        "mean_output_tokens": 682.92,
+        "output_tokens_sd": 435.0284,
+        "success_rate": 1.0
+      },
+      "graphrag": {
+        "latency_ms_sd": 34024.5279,
+        "mean_latency_ms": 64646.64,
+        "mean_output_tokens": 2011.42,
+        "output_tokens_sd": 1030.3618,
+        "success_rate": 1.0
+      },
+      "oracle": {
+        "latency_ms_sd": 16698.4589,
+        "mean_latency_ms": 21692.5,
+        "mean_output_tokens": 360.08,
+        "output_tokens_sd": 273.5844,
+        "success_rate": 0.9166666666666666
+      }
+    },
+    "measured_at_token_budget": 4000,
+    "note": "output tokens track context precision and reproduced across two live runs; success at this budget did not"
+  },
+  "max_items": 200,
+  "note": "mock runs measure whether required evidence survives the budget, not model competence",
+  "points": [
+    {
+      "arms": {
+        "classic": {
+          "attempts": 12,
+          "latency_ms_sd": 62191.9143,
+          "mean_context_items": 4.5,
+          "mean_context_tokens": 498.5,
+          "mean_latency_ms": 57475.92,
+          "mean_output_tokens": 1082.0,
+          "mean_tokens_left_unused": 13.0,
+          "output_tokens_sd": 1533.1841,
+          "stop_reasons": {
+            "candidates_exhausted": 4,
+            "token_budget": 8
+          },
+          "success_rate": 0.75,
+          "success_rate_swing": 0.1666,
+          "successes": 9
+        },
+        "graph_only": {
+          "attempts": 12,
+          "latency_ms_sd": 42872.2072,
+          "mean_context_items": 4.0,
+          "mean_context_tokens": 489.0,
+          "mean_latency_ms": 49738.0,
+          "mean_output_tokens": 601.08,
+          "mean_tokens_left_unused": 22.67,
+          "output_tokens_sd": 431.1685,
+          "stop_reasons": {
+            "candidates_exhausted": 6,
+            "token_budget": 6
+          },
+          "success_rate": 1.0,
+          "success_rate_swing": 0.0,
+          "successes": 12
+        },
+        "graphrag": {
+          "attempts": 12,
+          "latency_ms_sd": 18270.3526,
+          "mean_context_items": 4.17,
+          "mean_context_tokens": 491.67,
+          "mean_latency_ms": 45148.63,
+          "mean_output_tokens": 842.0,
+          "mean_tokens_left_unused": 20.5,
+          "output_tokens_sd": 421.1081,
+          "stop_reasons": {
+            "candidates_exhausted": 4,
+            "token_budget": 8
+          },
+          "success_rate": 0.9166666666666666,
+          "success_rate_swing": 0.1667,
+          "successes": 11
+        },
+        "oracle": {
+          "attempts": 12,
+          "latency_ms_sd": 27200.1344,
+          "mean_context_items": 3.0,
+          "mean_context_tokens": 379.0,
+          "mean_latency_ms": 30020.32,
+          "mean_output_tokens": 234.58,
+          "mean_tokens_left_unused": 132.83,
+          "output_tokens_sd": 121.0518,
+          "stop_reasons": {
+            "candidates_exhausted": 12
+          },
+          "success_rate": 1.0,
+          "success_rate_swing": 0.0,
+          "successes": 12
+        }
+      },
+      "token_budget": 512,
+      "variance": true
+    },
+    {
+      "arms": {
+        "classic": {
+          "attempts": 12,
+          "latency_ms_sd": 13730.5753,
+          "mean_context_items": 8.17,
+          "mean_context_tokens": 994.5,
+          "mean_latency_ms": 38747.69,
+          "mean_output_tokens": 995.42,
+          "mean_tokens_left_unused": 28.83,
+          "output_tokens_sd": 515.7215,
+          "stop_reasons": {
+            "candidates_exhausted": 10,
+            "token_budget": 2
+          },
+          "success_rate": 0.9166666666666666,
+          "success_rate_swing": 0.1667,
+          "successes": 11
+        },
+        "graph_only": {
+          "attempts": 12,
+          "latency_ms_sd": 112466.6782,
+          "mean_context_items": 8.0,
+          "mean_context_tokens": 999.67,
+          "mean_latency_ms": 72170.96,
+          "mean_output_tokens": 828.75,
+          "mean_tokens_left_unused": 24.5,
+          "output_tokens_sd": 801.3679,
+          "stop_reasons": {
+            "candidates_exhausted": 4,
+            "token_budget": 8
+          },
+          "success_rate": 1.0,
+          "success_rate_swing": 0.0,
+          "successes": 12
+        },
+        "graphrag": {
+          "attempts": 12,
+          "latency_ms_sd": 93508.2407,
+          "mean_context_items": 8.0,
+          "mean_context_tokens": 1011.17,
+          "mean_latency_ms": 63984.82,
+          "mean_output_tokens": 1035.83,
+          "mean_tokens_left_unused": 13.33,
+          "output_tokens_sd": 364.7048,
+          "stop_reasons": {
+            "candidates_exhausted": 2,
+            "token_budget": 10
+          },
+          "success_rate": 0.8333333333333334,
+          "success_rate_swing": 0.0,
+          "successes": 10
+        },
+        "oracle": {
+          "attempts": 12,
+          "latency_ms_sd": 11185.8733,
+          "mean_context_items": 3.0,
+          "mean_context_tokens": 379.33,
+          "mean_latency_ms": 16723.42,
+          "mean_output_tokens": 401.58,
+          "mean_tokens_left_unused": 644.5,
+          "output_tokens_sd": 380.9964,
+          "stop_reasons": {
+            "candidates_exhausted": 12
+          },
+          "success_rate": 0.9166666666666666,
+          "success_rate_swing": 0.1667,
+          "successes": 11
+        }
+      },
+      "token_budget": 1024,
+      "variance": false
+    },
+    {
+      "arms": {
+        "classic": {
+          "attempts": 12,
+          "latency_ms_sd": 13204.7575,
+          "mean_context_items": 22.83,
+          "mean_context_tokens": 2015.5,
+          "mean_latency_ms": 33998.73,
+          "mean_output_tokens": 946.67,
+          "mean_tokens_left_unused": 31.67,
+          "output_tokens_sd": 364.2672,
+          "stop_reasons": {
+            "candidates_exhausted": 8,
+            "token_budget": 4
+          },
+          "success_rate": 0.6666666666666666,
+          "success_rate_swing": 0.0,
+          "successes": 8
+        },
+        "graph_only": {
+          "attempts": 12,
+          "latency_ms_sd": 19012.0347,
+          "mean_context_items": 20.0,
+          "mean_context_tokens": 2034.33,
+          "mean_latency_ms": 22666.21,
+          "mean_output_tokens": 450.58,
+          "mean_tokens_left_unused": 13.83,
+          "output_tokens_sd": 155.7792,
+          "stop_reasons": {
+            "candidates_exhausted": 2,
+            "token_budget": 10
+          },
+          "success_rate": 1.0,
+          "success_rate_swing": 0.0,
+          "successes": 12
+        },
+        "graphrag": {
+          "attempts": 12,
+          "latency_ms_sd": 42395.3917,
+          "mean_context_items": 19.5,
+          "mean_context_tokens": 2030.83,
+          "mean_latency_ms": 59774.19,
+          "mean_output_tokens": 1516.58,
+          "mean_tokens_left_unused": 18.0,
+          "output_tokens_sd": 990.1895,
+          "stop_reasons": {
+            "candidates_exhausted": 4,
+            "token_budget": 8
+          },
+          "success_rate": 0.8333333333333334,
+          "success_rate_swing": 0.0,
+          "successes": 10
+        },
+        "oracle": {
+          "attempts": 12,
+          "latency_ms_sd": 19835.797,
+          "mean_context_items": 3.0,
+          "mean_context_tokens": 379.33,
+          "mean_latency_ms": 24026.52,
+          "mean_output_tokens": 468.83,
+          "mean_tokens_left_unused": 1668.5,
+          "output_tokens_sd": 474.3472,
+          "stop_reasons": {
+            "candidates_exhausted": 12
+          },
+          "success_rate": 1.0,
+          "success_rate_swing": 0.0,
+          "successes": 12
+        }
+      },
+      "token_budget": 2048,
+      "variance": true
+    },
+    {
+      "arms": {
+        "classic": {
+          "attempts": 12,
+          "latency_ms_sd": 45312.64,
+          "mean_context_items": 53.67,
+          "mean_context_tokens": 3973.67,
+          "mean_latency_ms": 56784.13,
+          "mean_output_tokens": 1076.5,
+          "mean_tokens_left_unused": 25.0,
+          "output_tokens_sd": 660.1571,
+          "stop_reasons": {
+            "candidates_exhausted": 6,
+            "token_budget": 6
+          },
+          "success_rate": 0.8333333333333334,
+          "success_rate_swing": 0.3333,
+          "successes": 10
+        },
+        "graph_only": {
+          "attempts": 12,
+          "latency_ms_sd": 18683.7398,
+          "mean_context_items": 45.33,
+          "mean_context_tokens": 3975.17,
+          "mean_latency_ms": 30201.28,
+          "mean_output_tokens": 682.92,
+          "mean_tokens_left_unused": 24.83,
+          "output_tokens_sd": 435.0284,
+          "stop_reasons": {
+            "candidates_exhausted": 4,
+            "token_budget": 8
+          },
+          "success_rate": 1.0,
+          "success_rate_swing": 0.0,
+          "successes": 12
+        },
+        "graphrag": {
+          "attempts": 12,
+          "latency_ms_sd": 34024.5279,
+          "mean_context_items": 45.0,
+          "mean_context_tokens": 3980.33,
+          "mean_latency_ms": 64646.64,
+          "mean_output_tokens": 2011.42,
+          "mean_tokens_left_unused": 20.83,
+          "output_tokens_sd": 1030.3618,
+          "stop_reasons": {
+            "candidates_exhausted": 6,
+            "token_budget": 6
+          },
+          "success_rate": 1.0,
+          "success_rate_swing": 0.0,
+          "successes": 12
+        },
+        "oracle": {
+          "attempts": 12,
+          "latency_ms_sd": 16698.4589,
+          "mean_context_items": 3.0,
+          "mean_context_tokens": 379.33,
+          "mean_latency_ms": 21692.5,
+          "mean_output_tokens": 360.08,
+          "mean_tokens_left_unused": 3620.5,
+          "output_tokens_sd": 273.5844,
+          "stop_reasons": {
+            "candidates_exhausted": 12
+          },
+          "success_rate": 0.9166666666666666,
+          "success_rate_swing": 0.1667,
+          "successes": 11
+        }
+      },
+      "token_budget": 4000,
+      "variance": false
+    }
+  ],
+  "primary_endpoint": {
+    "arms": {
+      "classic": {
+        "budget_to_reach_target": null,
+        "ratio_to_full_file_ceiling": null,
+        "ratio_to_oracle_floor": null,
+        "reached_target": false
+      },
+      "graph_only": {
+        "budget_to_reach_target": 512,
+        "ratio_to_full_file_ceiling": null,
+        "ratio_to_oracle_floor": 1.0,
+        "reached_target": true
+      },
+      "graphrag": {
+        "budget_to_reach_target": 4000,
+        "ratio_to_full_file_ceiling": null,
+        "ratio_to_oracle_floor": 7.81,
+        "reached_target": true
+      },
+      "oracle": {
+        "budget_to_reach_target": 512,
+        "ratio_to_full_file_ceiling": null,
+        "ratio_to_oracle_floor": 1.0,
+        "reached_target": true
+      }
+    },
+    "ceiling_arm": null,
+    "floor_arm": "oracle",
+    "metric": "smallest swept token budget at which the arm reaches the target",
+    "note": "success rate is a precondition, not the contrast: an arm that never reaches the target has no budget to compare, and one that does is compared on tokens, not on wins",
+    "target_success_rate": 1.0,
+    "unreached_arms": [
+      "classic"
+    ]
+  },
+  "repetitions": 2,
+  "stopping_rule": null,
+  "tokens_to_reach": {
+    "classic": {
+      "budget_for_success_rate_0.5": 512,
+      "budget_for_success_rate_1": null
+    },
+    "graph_only": {
+      "budget_for_success_rate_0.5": 512,
+      "budget_for_success_rate_1": 512
+    },
+    "graphrag": {
+      "budget_for_success_rate_0.5": 512,
+      "budget_for_success_rate_1": 4000
+    },
+    "oracle": {
+      "budget_for_success_rate_0.5": 512,
+      "budget_for_success_rate_1": 512
+    }
+  }
+}
